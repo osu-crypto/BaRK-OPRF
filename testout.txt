@@ -1,0 +1,4 @@
+#Stash size 0
+# size: 2^5.54518 = 256
+#Output Intersection: 256
+#Expected Intersection: 256

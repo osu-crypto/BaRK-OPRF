@@ -26,14 +26,14 @@ After cloning project from git,
 2. for test:
 	./Release/main.exe -t
 	
-### Test:
+### Test
 Our database is generated randomly. We have 2 functions: 
-##### Unit Test: 
+#### 1. Unit Test: 
 test PSI result for a small number of inputs (2^12), shows whether the program computes a right PSI. This test runs on one terminal:
 
 	./main.exe -t
 	
-##### Simulation: 
+#### 2. Simulation: 
 Using two terminals, compute PSI in 6 cases with the number of input (2^8, 2^12, 2^16, 2^18, 2^20, 2^24). For each case, we run the code 10 times to compute PSI. The outputs include the average online/offline/total runtime (displayed on the screen) and the output.txt file. Note that these parameters can be customized in the code.
 On the Sender's terminal, run:
 

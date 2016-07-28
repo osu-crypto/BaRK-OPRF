@@ -1,5 +1,5 @@
 # Batched Oblivious PRF
-This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://...)]. Our code utilizes some parts for OT Extension implementation, and the [`libPSI`] (https://github.com/osu-crypto/libPSI) framework provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. For any questions related to the implementation, please contact Ni Trieu at trieun@oregonstate.edu
+This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://...)]. Our code utilizes some parts of the [`libPSI`] (https://github.com/osu-crypto/libPSI) framework (OT extension) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. For any questions related to the implementation, please contact Ni Trieu at trieun@oregonstate.edu
 
 ## Abstract
 ---

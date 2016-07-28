@@ -5,7 +5,7 @@ This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious 
 ---
 .......
 
-## Installations:
+## Installations
 ---
 ###Required libraries
   * [`Boost`](https://sourceforge.net/projects/boost/)

@@ -21,7 +21,7 @@ After cloning project from git,
 2. add argument for bOPRFmain project (for example: -t)
 3. run bOPRFmain project
  
-##### Linux
+##### Linux:
 1. make
 2. for test:
 	./Release/main.exe -t

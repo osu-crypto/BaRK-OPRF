@@ -1,7 +1,6 @@
 #include <iostream>
 
 using namespace std;
-#include "UnitTests.h" 
 #include "Common/Defines.h"
 #include "PSI/BopPsiReceiver.h"
 #include "PSI/BopPsiSender.h"

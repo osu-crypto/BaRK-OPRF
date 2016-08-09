@@ -98,7 +98,7 @@ namespace bOPRF
 			insertItem(i,hashs);
 		}
 
-	//	Log::out << "#Stash size " << mStash.size() << Log::endl;
+//		Log::out << "#Stash size " << mStash.size() << Log::endl;
 
 		mStash.resize(mMaxStashSize);
 	}

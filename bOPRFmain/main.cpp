@@ -278,7 +278,6 @@ void BopRecv()
 
 			auto end = timer.setTimePoint("done");
 
-
 			auto offlineTime = std::chrono::duration_cast<std::chrono::milliseconds>(mid - start).count();
 			auto online = std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count();
 
@@ -400,6 +399,7 @@ void BopTest()
 		//output
 		Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
 		Log::out << "#Expected Intersection: " << rand << Log::endl;
+		
 		if (recvPSIs.mIntersection.size() != rand)
 		{
 			Log::out << "\nbad intersection,  expecting full set of size  " << setSize << " but got " << recvPSIs.mIntersection.size() << Log::endl;

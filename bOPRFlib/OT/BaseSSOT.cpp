@@ -47,8 +47,7 @@ namespace bOPRF {
 	{
 		u64 n = SSOT_Base_Choice.size();
 	//	Log::out <<  "Starting base SSOTs as " << role_to_str1(role) << ", n = " << n << Log::endl;
-		vector<ByteStream> strm(2);
-		std::atomic<u64> sendedDoneIdx(0), recvDoneIdx(0);
+		vector<ByteStream> strm(2);	
 		IknpOtExtSender4k sender;
 		IknpOtExtReceiver4k recv;
 
@@ -71,7 +70,7 @@ namespace bOPRF {
 			NaorPinkas base;
 			base.Sender(baseSenderMsg, channel, G, 2);		
 			recv.setBaseOts(baseSenderMsg);
-			recv.Extend(SSOT_Base_Choice, recvMsg, G, channel, recvDoneIdx);
+			recv.Extend(SSOT_Base_Choice, recvMsg, G, channel);
 		}
 
 
@@ -84,7 +83,7 @@ namespace bOPRF {
 			NaorPinkas base;
 			base.Receiver(baseRecvMsg, baseChoices, channel, G, 2);
 			sender.setBaseOts(baseRecvMsg, baseChoices);
-			sender.Extend(sendMsg, G, channel, sendedDoneIdx);
+			sender.Extend(sendMsg, G, channel);
 		}
 	}
 

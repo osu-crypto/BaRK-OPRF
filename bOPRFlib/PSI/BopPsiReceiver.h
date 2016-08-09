@@ -26,8 +26,8 @@ namespace bOPRF
 
 		u64 mNumStash;
 
-		void init(u64 n, u64 statSecParam, Channel& chl0, SSOtExtReceiver& otRecv, std::atomic<u64>& doneIdx, block seed);
-		void init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv, std::atomic<u64>& doneIdx, block seed);
+		void init(u64 n, u64 statSecParam, Channel& chl0, SSOtExtReceiver& otRecv,  block seed);
+		void init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv,  block seed);
 		void sendInput(std::vector<block>& inputs, Channel& chl);
 		void sendInput(std::vector<block>& inputs, const std::vector<Channel*>& chls);
 

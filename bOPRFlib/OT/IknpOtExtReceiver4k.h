@@ -34,8 +34,7 @@ namespace bOPRF
 			const BitVector choices,
 			std::array<std::array<block, BASE_OT_COUNT>, 4> &messages,
 			PRNG& prng,
-			Channel& chl,
-			std::atomic<u64>& doneIdx);// override;
+			Channel& chl);// override;
 
 	};
 

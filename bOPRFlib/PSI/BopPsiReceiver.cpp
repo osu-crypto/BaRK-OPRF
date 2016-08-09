@@ -32,13 +32,13 @@ namespace bOPRF
 	{
 	}
 
-	void BopPsiReceiver::init(u64 n, u64 statSecParam, Channel & chl0, SSOtExtReceiver& ots, std::atomic<u64>& doneIdx, block seed)
+	void BopPsiReceiver::init(u64 n, u64 statSecParam, Channel & chl0, SSOtExtReceiver& ots, block seed)
 	{
-		init(n, statSecParam, { &chl0 }, ots, doneIdx, seed);
+		init(n, statSecParam, { &chl0 }, ots, seed);
 	}
 
 
-	void BopPsiReceiver::init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv, std::atomic<u64>& doneIdx, block seed)
+	void BopPsiReceiver::init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv, block seed)
 	{
 
 		mStatSecParam = statSecParam;
@@ -46,7 +46,7 @@ namespace bOPRF
 
 		mNumStash = get_stash_size(n);
 
-		//gTimer.setTimePoint("r Init.start");
+		gTimer.setTimePoint("Init.start");
 		PRNG prngHashing(seed);
 		block myHashSeeds;
 		myHashSeeds = prngHashing.get_block();
@@ -71,13 +71,13 @@ namespace bOPRF
 			if (otRecv.hasBaseSSOts() == false)
 			{
 				//Timer timer;
-				//gTimer.setTimePoint("Init.startBase");
+				gTimer.setTimePoint("Init: BaseSSOT start");
 				Log::setThreadName("receiver");
 				BaseSSOT baseSSOTs(chl0, OTRole::Sender);
 				baseSSOTs.exec_base(prngHashing);
 				baseSSOTs.check();
 				otRecv.setBaseSSOts(baseSSOTs.sender_inputs);
-				//gTimer.setTimePoint("Init.baseSSOTDone");
+				gTimer.setTimePoint("Init: BaseSSOT done");
 				//	Log::out << gTimer;
 			}
 
@@ -85,7 +85,7 @@ namespace bOPRF
 
 		//gTimer.setTimePoint("Init.ExtStart");
 		//extend OT
-		otRecv.Extend(mBins.mBinCount + mNumStash, mSSOtMessages, chl0, doneIdx);
+		otRecv.Extend(mBins.mBinCount + mNumStash, mSSOtMessages, chl0);
 
 		//gTimer.setTimePoint("r Init.Done");
 		//	Log::out << gTimer;
@@ -102,7 +102,7 @@ namespace bOPRF
 		// check that the number of inputs is as expected.
 		if (inputs.size() != mN)
 			throw std::runtime_error("inputs.size() != mN");
-		//gTimer.setTimePoint("Online.Start");
+		gTimer.setTimePoint("Online.Start");
 
 		//asign channel
 		auto& chl = *chls[0];
@@ -152,7 +152,7 @@ namespace bOPRF
 			//std::unordered_map<u64, std::pair<block, u64>> localMasks;
 			//if # input > 2^20
 			//ALSO: need to change all reference!
-		std::unordered_map<u32, std::pair<block, u64>> localMasks;
+		std::unordered_map<u64, std::pair<block, u64>> localMasks;
 		localMasks.reserve((mBins.mBinCount + mNumStash));
 
 		blockBop codeWord;
@@ -213,7 +213,7 @@ namespace bOPRF
 
 					//NOTE: if the key of localMask have type u64, change
 					//localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
-					localMasks.emplace(*(u32*)&mask, std::pair<block, u64>(mask, item.mIdx));
+					localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
 
 				}
 				else
@@ -258,7 +258,7 @@ namespace bOPRF
 
 				//NOTE: if the key of localMask have type u64, change
 				//localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
-				localMasks.emplace(*(u32*)&mask, std::pair<block, u64>(mask, item.mIdx));
+				localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
 			}
 			else
 			{
@@ -278,7 +278,7 @@ namespace bOPRF
 		u64 cntMask = (3 + mNumStash)*mBins.mN;
 		auto expectedSize = (cntMask* maskSize);
 
-		gTimer.setTimePoint("r Online.BinsRecved");
+		gTimer.setTimePoint("Online.MaskReceived");
 		if (recvBuff.size() != expectedSize)
 		{
 			Log::out << "recvBuff.size() != expectedSize" << Log::endl;
@@ -292,7 +292,7 @@ namespace bOPRF
 			//NOTE: if the key of localMask have type u64, change to
 			//auto& kk = *(u64*)(theirMasks);
 
-			auto& kk = *(u32*)(theirMasks);
+			auto& kk = *(u64*)(theirMasks);
 
 			// check 32 first bits
 			auto match = localMasks.find(kk);
@@ -309,7 +309,7 @@ namespace bOPRF
 			theirMasks += maskSize;
 
 		}
-		//gTimer.setTimePoint("r Online.Done"); 
+		gTimer.setTimePoint("Online.Done"); 
 	//	Log::out << gTimer << Log::endl;
 	}
 }

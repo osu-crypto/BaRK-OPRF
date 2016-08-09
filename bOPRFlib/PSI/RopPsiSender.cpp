@@ -16,12 +16,12 @@ namespace bOPRF
 	}
 	extern std::string hexString(u8* data, u64 length);
 
-	void BopPsiSender::init(u64 n, u64 statSec, Channel & chl0, SSOtExtSender& ots, std::atomic<u64>& doneIdx, block seed)
+	void BopPsiSender::init(u64 n, u64 statSec, Channel & chl0, SSOtExtSender& ots, block seed)
 	{
-		init(n, statSec, { &chl0 }, ots, doneIdx, seed);
+		init(n, statSec, { &chl0 }, ots, seed);
 	}
 
-	void BopPsiSender::init(u64 n, u64 statSec, const std::vector<Channel*>& chls, SSOtExtSender& otSend, std::atomic<u64>& doneIdx, block seed)
+	void BopPsiSender::init(u64 n, u64 statSec, const std::vector<Channel*>& chls, SSOtExtSender& otSend, block seed)
 	{
 		mStatSecParam = statSec;
 		mN = n;
@@ -58,8 +58,8 @@ namespace bOPRF
 
 		mHashingSeed = myHashSeeds ^ theirHashingSeeds;
 
-		otSend.Extend(mBins.mBinCount + mNumStash, mPsiRecvSSOtMessages, chl0, doneIdx);
-		gTimer.setTimePoint("s InitS.extFinished");
+		otSend.Extend(mBins.mBinCount + mNumStash, mPsiRecvSSOtMessages, chl0);
+		//gTimer.setTimePoint("s InitS.extFinished");
 	}
 
 

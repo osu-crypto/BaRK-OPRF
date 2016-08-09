@@ -141,14 +141,14 @@ void BopSender()
 
 	pingTest(*sendChls[0], true);
 
-	for (auto pow : { 8,12,16,18,20,24 })
+	for (auto pow : { 8,12,16,20,24 })
 	{
 	
 		u64 setSize = (1 << pow), psiSecParam = 40;
 		u64 offlineTimeTot(0);
 		u64 onlineTimeTot(0);
 
-		for (u64 jj = 0; jj < numTrial; ++jj)
+		for (u64 j = 0; j < numTrial; ++j)
 		{
 			//u64 repeatCount = 4;
 			u64 setSize = (1 << pow),psiSecParam = 40;
@@ -172,10 +172,7 @@ void BopSender()
 			SSOtExtSender OTSender0;
 
 
-			BopPsiSender sendPSIs;
-
-			std::atomic<u64>dd(0);
-			
+			BopPsiSender sendPSIs;			
 
 			u8 dumm[1];
 			sendChls[0]->asyncSend(dumm, 1);
@@ -184,7 +181,7 @@ void BopSender()
 
 
 			gTimer.reset();
-			sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0, dd, OneBlock);
+			sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
 
 
 			sendPSIs.sendInput(sendSet, sendChls);
@@ -233,7 +230,7 @@ void BopRecv()
 	//8,12,16,
 	Log::out << "--------------------------\n";
 
-	for (auto pow : { 8,12,16,18,20,24 })
+	for (auto pow : { 8,12,16,20,24 })
 	//for (auto pow : { 16,20 })
 	{
 
@@ -241,9 +238,9 @@ void BopRecv()
 		u64 onlineTimeTot(0);
 		u64 setSize = (1 << pow), psiSecParam = 40;
 
-		Log::out << "setSize" << "  |  " << "offline" << "  |  " << "online" << Log::endl;
+		Log::out << "setSize" << "  |  " << "offline(ms)" << "  |  " << "online(ms)" << Log::endl;
 
-		for (u64 jj = 0; jj < numTrial; ++jj)
+		for (u64 j = 0; j < numTrial; ++j)
 		{
 			PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
 			PRNG prngDiff(_mm_set_epi32(434653, 23, 11, 56));
@@ -263,7 +260,7 @@ void BopRecv()
 			SSOtExtReceiver OTRecver0;
 			BopPsiReceiver recvPSIs;
 						
-			std::atomic<u64>dd(0);
+			u64 dd(0);
 			
 			u8 dumm[1];
 			recvChls[0]->recv(dumm, 1);
@@ -274,12 +271,13 @@ void BopRecv()
 			Timer timer;
 			timer.setTimePoint("start");
 			auto start = timer.setTimePoint("start");
-			recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0, dd, ZeroBlock);
+			recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0,  ZeroBlock);
 			auto mid = timer.setTimePoint("init");
 			recvPSIs.sendInput(recvSet, recvChls);
 			//timer.setTimePoint("Done");
 
 			auto end = timer.setTimePoint("done");
+
 
 			auto offlineTime = std::chrono::duration_cast<std::chrono::milliseconds>(mid - start).count();
 			auto online = std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count();
@@ -379,19 +377,25 @@ void BopTest()
 	
 		std::thread thrd([&]() {
 			PRNG prng(bb);
-			std::atomic<u64>dd(0);
 			//sender thread
-			sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0,  dd, OneBlock);
+			sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0,  OneBlock);
 			sendPSIs.sendInput(sendSet, sendChls);
 		});
 
 		u64 otIdx = 0;
-		std::atomic<u64>dd(0);
 
 		gTimer.reset();
 		//receiver thread
-		recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0, dd, ZeroBlock);
+		auto start = gTimer.setTimePoint("start");
+		recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
 		recvPSIs.sendInput(recvSet, recvChls);
+		auto end = gTimer.setTimePoint("done");
+
+
+		auto totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+		Log::out << gTimer << Log::endl;
+
+		Log::out << "Total Time: " << totalTime << "(ms)\t\t\n" << Log::endl;
 
 		//output
 		Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;

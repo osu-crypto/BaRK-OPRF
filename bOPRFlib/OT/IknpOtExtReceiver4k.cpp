@@ -28,8 +28,7 @@ namespace bOPRF
 		const BitVector choices,
 		std::array<std::array<block, BASE_OT_COUNT>, 4> &messages,
 		PRNG& prng,
-		Channel& chl,
-		std::atomic<u64>& doneIdx)
+		Channel& chl)
 	{
 		if (choices.size() == 0) return;
 
@@ -38,6 +37,7 @@ namespace bOPRF
 
 		auto numOTExt = 512;
 		u64 numBlocks = 4; 
+		u64 doneIdx = 0;
 
 		std::array<std::array<block, BASE_OT_COUNT>, 4> t0;
 
@@ -83,7 +83,8 @@ namespace bOPRF
 			chl.asyncSend(std::move(uBuff));
 
 			// transpose t0 in place
-			eklundh_transpose128(t0[blkIdx]);
+			//eklundh_transpose128(t0[blkIdx]);
+			sse_transpose128(t0[blkIdx]);
 
 #ifdef OTEXT_DEBUG 
 			chl.recv(debugBuff); assert(debugBuff.size() == sizeof(t0));

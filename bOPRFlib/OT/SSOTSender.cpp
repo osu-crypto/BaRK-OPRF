@@ -32,8 +32,7 @@ namespace bOPRF
 		const u64 input_size,
 		//std::vector<std::array<block, 4>> recvMsg,
 		std::vector<blockBop>& recvMsg,
-		Channel& chl,
-		std::atomic<u64>& doneIdx)
+		Channel& chl)
 	{
 		// round up
 		u64 numOTExt =  ((input_size + 127) / 128) * 128;
@@ -41,7 +40,7 @@ namespace bOPRF
 		// we are going to process SSOTs in blocks of 128 messages.
 		u64 numBlocks = numOTExt / BASE_OT_COUNT;
 
-		doneIdx = 0;
+		u64 doneIdx = 0;
 		std::array<std::array<block, BASE_OT_COUNT>, 4> q;	
 
 #ifdef OTEXT_DEBUG
@@ -66,7 +65,7 @@ namespace bOPRF
 
 				}
 
-				eklundh_transpose128(q[ssotBlkColIdx]);
+				sse_transpose128(q[ssotBlkColIdx]);
 			}		
 
 			u32 stopIdx = std::min(u64(BASE_OT_COUNT), input_size - doneIdx);

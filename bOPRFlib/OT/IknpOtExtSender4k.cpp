@@ -27,8 +27,7 @@ namespace bOPRF
 	void IknpOtExtSender4k::Extend(
 		std::array<std::array<std::array<block,2>, BASE_OT_COUNT>, 4> &messages,
 		PRNG& prng,
-		Channel& chl,
-		std::atomic<u64>& doneIdx)
+		Channel& chl)
 	{
 		if (messages.size() == 0) return;
 
@@ -38,8 +37,6 @@ namespace bOPRF
 		SHA1 sha;
 		u8 hashBuff[SHA1::HashSize];
 
-		
-		doneIdx = 0;
 		std::array<std::array<block, BASE_OT_COUNT>,4> q;
 		block delta = *(block*)mBaseChoiceBits.data();
 		ByteStream buff;
@@ -70,7 +67,8 @@ namespace bOPRF
 				}
 			}
 
-			eklundh_transpose128(q[blkIdx]);
+			//eklundh_transpose128(q[blkIdx]);
+			sse_transpose128(q[blkIdx]);
 
 #ifdef OTEXT_DEBUG
 			buff.setp(0);

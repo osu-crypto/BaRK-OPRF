@@ -27,8 +27,7 @@ namespace bOPRF
 			const BitVector choices,
 			ArrayView<block> messages,
 			PRNG& prng,
-			Channel& chl,
-			std::atomic<u64>& doneIdx)=0;
+			Channel& chl)=0;
 
 		void Extend(
 			const BitVector choices,
@@ -36,8 +35,7 @@ namespace bOPRF
 			PRNG& prng,
 			Channel& chl)
 		{
-			std::atomic<u64> doneIdx;
-			Extend(choices, messages, prng, chl, doneIdx);
+			Extend(choices, messages, prng, chl);
 		}
 	};
 
@@ -56,8 +54,7 @@ namespace bOPRF
 		virtual void Extend(
 			ArrayView<std::array<block, 2>> messages,
 			PRNG& prng,
-			Channel& chl,
-			std::atomic<u64>& doneIdx) = 0;
+			Channel& chl) = 0;
 
 
 		virtual void Extend(
@@ -65,8 +62,7 @@ namespace bOPRF
 			PRNG& prng,
 			Channel& chl) 
 		{
-			std::atomic<u64> doneIdx;
-			Extend(messages, prng, chl, doneIdx);
+			Extend(messages, prng, chl);
 		}
 	};
 }

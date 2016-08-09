@@ -32,8 +32,7 @@ namespace bOPRF {
 		void Extend(
 			std::array<std::array<std::array<block, 2>, BASE_OT_COUNT>, 4>& messages,
 			PRNG& prng,
-			Channel& chl,
-			std::atomic<u64>& doneIdx);// override;
+			Channel& chl);// override;
 
 	};
 }

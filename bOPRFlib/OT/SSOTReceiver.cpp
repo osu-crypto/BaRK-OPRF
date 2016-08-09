@@ -29,10 +29,9 @@ namespace bOPRF
 	void SSOtExtReceiver::Extend(
 		const u64 input_size,
 		std::vector<std::array<blockBop, 2>>& sendMsg,
-		Channel& chl,
-		std::atomic<u64>& doneIdx
-	)
+		Channel& chl)
 	{	
+		u64 doneIdx = 0;
 		if (mHasBase == false)
 			throw std::runtime_error("rt error at " LOCATION);
 	
@@ -60,8 +59,8 @@ namespace bOPRF
 				}
 
 				// transpose t0 in place
-				eklundh_transpose128(t0[ssotBlkColIdx]);
-				eklundh_transpose128(t1[ssotBlkColIdx]);
+				sse_transpose128(t0[ssotBlkColIdx]);
+				sse_transpose128(t1[ssotBlkColIdx]);
 			}
 			
 			u32 stopIdx = std::min(u64(BASE_OT_COUNT), input_size - doneIdx);

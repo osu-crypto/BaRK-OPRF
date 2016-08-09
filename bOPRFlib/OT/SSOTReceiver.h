@@ -36,8 +36,7 @@ namespace bOPRF
 			const u64 input_size,
 			//std::vector<std::array<std::array<block, 2>, 4>> sendMsg,
 			std::vector<std::array<blockBop, 2>>& sendMsg,
-			Channel& chl,
-			std::atomic<u64>& doneIdx);// override;
+			Channel& chl);// override;
 
 	};
 

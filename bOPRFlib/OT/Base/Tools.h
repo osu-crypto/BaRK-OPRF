@@ -4,7 +4,7 @@
 #include "Crypto/PRNG.h"
 #include "Common/Defines.h"
 #include "Network/Channel.h"
-
+using std::array;
 #define SEED_SIZE_BYTES SEED_SIZE
 namespace bOPRF {
 	/*
@@ -44,7 +44,7 @@ namespace bOPRF {
 	}
 	//#endif
 	void eklundh_transpose128(std::array<block, 128>& inOut);
-
+	void sse_transpose128(std::array<block, 128>& inOut);
 	std::string u64_to_bytes(const u64 w);
 
 	//void shiftl128(u64 x1, u64 x2, u64& res1, u64& res2, size_t k);

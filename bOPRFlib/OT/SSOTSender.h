@@ -34,8 +34,7 @@ namespace bOPRF {
 		void Extend(
 			const u64 input_size,
 			std::vector<blockBop>& recvMsg,
-			Channel& chl,
-			std::atomic<u64>& doneIdx); //override;
+			Channel& chl); //override;
 
 	};
 }

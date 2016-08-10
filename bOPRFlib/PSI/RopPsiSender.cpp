@@ -250,7 +250,7 @@ namespace bOPRF
 		//Log::out << "myMaskBuff->size()= " << myMaskBuff->size() / maskSize << Log::endl;
 		//Log::out << "cntMask= " << cntMask << Log::endl;
 
-		//fill the rest of the buffer with dummy. 
+		//fill the rest of the buffer with dummy (for the large number of input elements, the number of elements in 1.2n bins might not equal to 3*n. Therefore, we still need to fill a small masks (1 or 2)
 		myMaskByteIter = myMaskBuff->data();
 		auto dummyMasksSize = maskSize * (3 * mN - numHashs);
 		const block rndBlk = _mm_set_epi32(123213, 43154243, 3241248, 57657453);

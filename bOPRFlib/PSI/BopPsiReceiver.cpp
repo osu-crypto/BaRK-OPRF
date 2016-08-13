@@ -6,10 +6,15 @@
 #include "Common/Log.h"
 #include "OT/Base/naor-pinkas.h"
 #include <unordered_map>
-
+#include <type_traits>
+#include <typeinfo>
+#include <boost/mpl/if.hpp>
+namespace mpl = boost::mpl;
 
 namespace bOPRF
 {
+
+
 	std::string hexString(u8* data, u64 length)
 	{
 		std::stringstream ss;
@@ -68,18 +73,18 @@ namespace bOPRF
 		mSSOtMessages.resize(mBins.mBinCount + mNumStash);
 
 		//do base OT
-			if (otRecv.hasBaseSSOts() == false)
-			{
-				//Timer timer;
-				gTimer.setTimePoint("Init: BaseSSOT start");
-				Log::setThreadName("receiver");
-				BaseSSOT baseSSOTs(chl0, OTRole::Sender);
-				baseSSOTs.exec_base(prngHashing);
-				baseSSOTs.check();
-				otRecv.setBaseSSOts(baseSSOTs.sender_inputs);
-				gTimer.setTimePoint("Init: BaseSSOT done");
-				//	Log::out << gTimer;
-			}
+		if (otRecv.hasBaseSSOts() == false)
+		{
+			//Timer timer;
+			gTimer.setTimePoint("Init: BaseSSOT start");
+			Log::setThreadName("receiver");
+			BaseSSOT baseSSOTs(chl0, OTRole::Sender);
+			baseSSOTs.exec_base(prngHashing);
+			baseSSOTs.check();
+			otRecv.setBaseSSOts(baseSSOTs.sender_inputs);
+			gTimer.setTimePoint("Init: BaseSSOT done");
+			//	Log::out << gTimer;
+		}
 
 		mHashingSeed = myHashSeeds ^ theirHashingSeeds;
 
@@ -95,17 +100,44 @@ namespace bOPRF
 	{
 		sendInput(inputs, { &chl });
 	}
+
+	struct has_const_member
+	{
+		const bool x;
+
+		has_const_member(bool x_)
+			: x(x_)
+		{ }
+
+	};
+
 	void BopPsiReceiver::sendInput(std::vector<block>& inputs, const std::vector<Channel*>& chls)
 	{
-		//online phase.
+
+
+
+
+		//const bool leq1 = true;
+		//define keysearch of mask based on mask length
+//		typedef std::conditional<leq1, u32, u64>::type uMask;
 
 		// check that the number of inputs is as expected.
 		if (inputs.size() != mN)
 			throw std::runtime_error("inputs.size() != mN");
-		gTimer.setTimePoint("Online.Start");
+		gTimer.setTimePoint("R Online.Start");
 
 		//asign channel
 		auto& chl = *chls[0];
+
+		SHA1 sha1;
+		u8 hashBuff[SHA1::HashSize];
+
+		//random seed
+		PRNG prng(_mm_set_epi32(42534612345, 34557734565, 211234435, 23987045));
+
+		u64 codeWordSize = get_codeword_size(inputs.size()); //by byte
+		u64 maskSize = get_mask_size(inputs.size()); //by byte
+		blockBop codeWord;
 
 		//hash all items, use for: 1) arrage each item to bin using Cuckoo; 
 		//                         2) use for psedo-codeword.
@@ -131,34 +163,30 @@ namespace bOPRF
 		};
 
 		//insert item to corresponding bin
-		mBins.insertItems(aesHashBuffs); 
+		mBins.insertItems(aesHashBuffs);
 		//mBins.print();
 
+		//we use 4 unordered_maps, we put the mask to the corresponding unordered_map 
+		//that indicates of the hash function index 0,1,2. and the last unordered_maps is used for stash bin
+		std::array<std::unordered_map<u64, std::pair<block, u64>>, 4> localMasks;
+		//store the masks of elements that map to bin by h0
+		localMasks[0].reserve(mBins.mBinCount); //upper bound of # mask
+		//store the masks of elements that map to bin by h1
+		localMasks[1].reserve(mBins.mBinCount);
+		//store the masks of elements that map to bin by h2
+		localMasks[2].reserve(mBins.mBinCount);
+		//store the masks for stash bin
+		localMasks[3].reserve(mNumStash);
 
-		SHA1 sha1;
-		u8 hashBuff1[SHA1::HashSize];
-		
-		//random seed
-		PRNG prngRandome(_mm_set_epi32(42534612345, 34557734565, 211234435, 23987045));
 
+		//======================Bucket BINs (not stash)==========================
+
+		//pipelining the execution of the online phase (i.e., OT correction step) into multiple batches
+		TODO("run in parallel");
 		auto binStart = 0;
 		auto binEnd = mBins.mBinCount;
-
-		u64 maskSize = get_mask_size(inputs.size()); //by byte
-		u64 codeWordSize = get_codeword_size(inputs.size()); //by byte
-
-		TODO("define type for first key of localMasks (u32 or u64)")
-		//NOTE: you need to change the type of localMasks to
-			//std::unordered_map<u64, std::pair<block, u64>> localMasks;
-			//if # input > 2^20
-			//ALSO: need to change all reference!
-		std::unordered_map<u64, std::pair<block, u64>> localMasks;
-		localMasks.reserve((mBins.mBinCount + mNumStash));
-
-		blockBop codeWord;
-		// for each bin, compute our masks, and then the corresponding PSI mask.
-		TODO("run in parallel");
-
+		gTimer.setTimePoint("R Online.computeBucketMask start");
+		//for each batch
 		for (u64 stepIdx = binStart; stepIdx < binEnd; stepIdx += stepSize)
 		{
 			// compute the size of current step & end index.
@@ -177,7 +205,7 @@ namespace bOPRF
 				block mask(ZeroBlock);
 
 				if (item.isEmpty() == false)
-				{			
+				{
 					codeWord.elem[0] = aesHashBuffs[0][item.mIdx];
 					codeWord.elem[1] = aesHashBuffs[1][item.mIdx];
 					codeWord.elem[2] = aesHashBuffs[2][item.mIdx];
@@ -189,49 +217,95 @@ namespace bOPRF
 						^ mSSOtMessages[bIdx][0]
 						^ mSSOtMessages[bIdx][1];
 
-				
+
 					//compute my mask
 					sha1.Reset();
 					sha1.Update((u8*)&bIdx, sizeof(u64));
 					sha1.Update((u8*)&mSSOtMessages[bIdx][0], codeWordSize);
-					sha1.Final(hashBuff1);
+					sha1.Final(hashBuff);
 
 
 					// store the my mask value here					
-					memcpy(&mask, hashBuff1, maskSize); 
+					memcpy(&mask, hashBuff, maskSize);
 
-
-				//if (bIdx < 1)
-				//	{
-				//		//Log::out << "r  myMasksIter[" << bIdx << "]:" << hexString(myMasksIter, maskSize) << Log::endl;
-				//		//Log::out << "r  mask[" << bIdx << "]:" << mask << Log::endl;
-				//	//	Log::out << "r  mask[" << bIdx << "]:" << hexString((u8*)&mask, sizeof(u64)) << Log::endl;
-				//	}	
-				//	u64 aa = *(u64*)&mask;
-					//	Log::out << "r  aa" << hexString((u8*)&aa, sizeof(u64)) << Log::endl;
-
-
-					//NOTE: if the key of localMask have type u64, change
-					//localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
-					localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
+					//store my mask into corresponding buff at the permuted position
+					localMasks[item.mHashIdx].emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
 
 				}
 				else
 				{
 					// no item for this bin, just use a dummy.
-					myOt[i] = prngRandome.get_block512(codeWordSize);
-				}				
+					myOt[i] = prng.get_block512(codeWordSize);
+				}
 			}
-			// send the masks for the current step
+			// send the OT correction masks for the current step
 			chl.asyncSend(std::move(buff));
-		}// Done with compute the masks for the main set of bins. 
+		}// Done with compute the masks for the main set of bins. 		 
+		gTimer.setTimePoint("R Online.sendBucketMask done");
 
-		// buffer for the stash.
-		std::unique_ptr<ByteStream> buff(new ByteStream());
-		buff->resize((sizeof(blockBop)*mBins.mStash.size()));
-		auto myOt = buff->getArrayView<blockBop>();
+		//receive the sender's marks, we have 3 buffs that corresponding to the mask of elements used hash index 0,1,2
+		for (u64 buffIdx = 0; buffIdx < 3; buffIdx++)
+		{
+			ByteStream recvBuff;
+			chl.recv(recvBuff);
 
+			// double check the size.
+			u64 cntMask = mBins.mN;
+			if (recvBuff.size() != cntMask* maskSize)
+			{
+				Log::out << "recvBuff.size() != expectedSize" << Log::endl;
+				throw std::runtime_error("rt error at " LOCATION);
+			}
 
+			auto theirMasks = recvBuff.data();
+
+			//loop each mask
+			if (maskSize >= 8)
+			{
+				//if masksize>=8, we can check 64 bits of key from the map first
+				for (u64 i = 0; i < cntMask; ++i)
+				{
+					auto& msk = *(u64*)(theirMasks);
+
+					// check 64 first bits
+					auto match = localMasks[buffIdx].find(msk);
+
+					//if match, check for whole bits
+					if (match != localMasks[buffIdx].end())
+					{
+						if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+						{
+							mIntersection.push_back(match->second.second);
+							//Log::out << "#id: " << match->second.second << Log::endl;
+						}
+					}
+					theirMasks += maskSize;
+				}
+			}
+			else
+			{
+				for (u64 i = 0; i < cntMask; ++i)
+				{
+					for (auto match = localMasks[buffIdx].begin(); match != localMasks[buffIdx].end(); ++match)
+					{
+						if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+						{
+							mIntersection.push_back(match->second.second);
+							//Log::out << "#id: " << match->second.second << Log::endl;
+						}
+					}
+					theirMasks += maskSize;
+				}
+			}
+		}
+		gTimer.setTimePoint("R Online.Bucket done");
+
+		//======================STASH BIN==========================
+		std::unique_ptr<ByteStream> stashBuff(new ByteStream());
+		stashBuff->resize((sizeof(blockBop)*mBins.mStash.size()));
+		auto myOt = stashBuff->getArrayView<blockBop>();
+
+		gTimer.setTimePoint("R Online.Stash start");
 		// compute the encoding for each item in the stash.
 		for (u64 i = 0, otIdx = mBins.mBinCount; i < mBins.mStash.size(); ++i, ++otIdx)
 		{
@@ -253,63 +327,83 @@ namespace bOPRF
 				sha1.Reset();
 				sha1.Update((u8*)&otIdx, sizeof(u64));
 				sha1.Update((u8*)&mSSOtMessages[otIdx][0], codeWordSize);
-				sha1.Final(hashBuff1);
-				memcpy(&mask, hashBuff1, maskSize); 
+				sha1.Final(hashBuff);
+				memcpy(&mask, hashBuff, maskSize);
 
 				//NOTE: if the key of localMask have type u64, change
 				//localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
-				localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
+
+				 //put the mask into corresponding unordered_map					
+				localMasks[4].emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
 			}
 			else
 			{
-				myOt[i] = prngRandome.get_block512(codeWordSize);
+				myOt[i] = prng.get_block512(codeWordSize);
 			}
 		}
 
+		chl.asyncSend(std::move(stashBuff));
+		gTimer.setTimePoint("R Online.sendStashMask done");
 
-		chl.asyncSend(std::move(buff));
-
-		ByteStream recvBuff;
-
-		// receive the PSI values.
-		chl.recv(recvBuff);
-
-		// double check the size.
-		u64 cntMask = (3 + mNumStash)*mBins.mN;
-		auto expectedSize = (cntMask* maskSize);
-
-		gTimer.setTimePoint("Online.MaskReceived");
-		if (recvBuff.size() != expectedSize)
+		//receive masks from the stash
+		for (u64 sBuffIdx = 0; sBuffIdx < mNumStash; sBuffIdx++)
 		{
-			Log::out << "recvBuff.size() != expectedSize" << Log::endl;
-			throw std::runtime_error("rt error at " LOCATION);
-		}
-
-		auto theirMasks = recvBuff.data();
-
-		for (u64 i = 0; i < cntMask; ++i)
-		{
-			//NOTE: if the key of localMask have type u64, change to
-			//auto& kk = *(u64*)(theirMasks);
-
-			auto& kk = *(u64*)(theirMasks);
-
-			// check 32 first bits
-			auto match = localMasks.find(kk);
-
-			//if match, check for whole bits
-			if (match != localMasks.end())
+			ByteStream recvBuff;
+			chl.recv(recvBuff);
+			if (localMasks[3].size() != 0)
 			{
-				if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+				// double check the size.
+				auto cntMask = mN;
+
+				gTimer.setTimePoint("Online.MaskReceived from STASH");
+				if (recvBuff.size() != cntMask* maskSize)
 				{
-					mIntersection.push_back(match->second.second);
-					//	Log::out << "#id: " << match->second.second << Log::endl;
+					Log::out << "recvBuff.size() != expectedSize" << Log::endl;
+					throw std::runtime_error("rt error at " LOCATION);
+				}
+
+				auto theirMasks = recvBuff.data();
+				if (maskSize >= 8)
+				{
+					//if masksize>=8, we can check 64(8*8) bits of key from the map first by table-lookup
+					for (u64 i = 0; i < cntMask; ++i)
+					{
+						auto& msk = *(u64*)(theirMasks);
+
+						// check 64 first bits
+						auto match = localMasks[3].find(msk);
+
+						//if match, check for whole bits
+						if (match != localMasks[3].end())
+						{
+							if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+							{
+								mIntersection.push_back(match->second.second);
+								//	Log::out << "#id: " << match->second.second << Log::endl;
+							}
+						}
+						theirMasks += maskSize;
+					}
+				}
+				else
+				{
+					for (u64 i = 0; i < cntMask; ++i)
+					{
+						for (auto match = localMasks[sBuffIdx].begin(); match != localMasks[sBuffIdx].end(); ++match)
+						{
+							if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+							{
+								mIntersection.push_back(match->second.second);
+								//Log::out << "#id: " << match->second.second << Log::endl;
+							}
+						}
+						theirMasks += maskSize;
+					}
 				}
 			}
-			theirMasks += maskSize;
-
 		}
-		gTimer.setTimePoint("Online.Done"); 
+
+	gTimer.setTimePoint("Online.Done");
 	//	Log::out << gTimer << Log::endl;
-	}
+}
 }

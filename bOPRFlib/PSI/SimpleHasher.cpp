@@ -80,7 +80,7 @@ namespace bOPRF
 				addr = xrHashVal % mBinCount;
 				//cnt1++;
 
-				if (std::find(idxs.begin(), idxs.end(), addr ) == idxs.end())
+				//if (std::find(idxs.begin(), idxs.end(), addr ) == idxs.end())
 				{
 					auto bb = mBins[addr].mSize;
 					//mBins[addr].mItems[bb].mValue = item;
@@ -90,7 +90,7 @@ namespace bOPRF
 					mBins[addr].mSize++;
 					cnt++;
 
-					idxs[j] = addr;
+					//idxs[j] = addr;
 				}
 			}
 		}	

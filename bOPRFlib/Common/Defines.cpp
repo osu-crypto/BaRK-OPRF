@@ -176,17 +176,17 @@ namespace bOPRF {
 	}
 	u64 get_mask_size(u64 neles) {
 		if (neles >= (1 << 24))
-			return 94/8;  // in byte
+			return 88/8;  // in byte
 		if (neles >= (1 << 20))
-			return 88 / 8;
-		if (neles >= (1 << 16))
 			return 80 / 8;
-		if (neles >= (1 << 12))
+		if (neles >= (1 << 16))
 			return 72 / 8;
-		if (neles >= (1 << 8))
+		if (neles >= (1 << 12))
 			return 64 / 8;
+		if (neles >= (1 << 8))
+			return 56 / 8;
 
-		return 64/8;
+		return 56 /8;
 		//return (40 + 2 * log(neles)) / 8;
 
 	//	throw std::runtime_error("get_codeword_size: rt error at " LOCATION);

@@ -88,6 +88,7 @@ namespace bOPRF
 		else
 		{
 			// put in stash
+			//hashIdx = 2; //assign the hash Idx be 2
 			mStash.emplace_back(IdxItem, hashIdx);
 		}
 	}

@@ -8,6 +8,7 @@
 #include "boost/lexical_cast.hpp"
 #include <emmintrin.h>
 #include <smmintrin.h>
+
 #include "Common/Timer.h"
 //#include <mmintrin.h>
 //#include <xmmintrin.h>
@@ -129,6 +130,12 @@ struct blockBop
 	inline u64 roundUpTo(u64 val, u64 step)
 	{
 		return ((val + step - 1) / step) * step;
+	}
+	inline bool leq(u64 a, u64 b)
+	{
+		if (a < b)
+			return true;
+		return false;
 	}
 
 	inline u8* ByteArray(const block& b)

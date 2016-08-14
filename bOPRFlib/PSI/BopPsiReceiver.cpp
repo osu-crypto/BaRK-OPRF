@@ -168,15 +168,16 @@ namespace bOPRF
 
 		//we use 4 unordered_maps, we put the mask to the corresponding unordered_map 
 		//that indicates of the hash function index 0,1,2. and the last unordered_maps is used for stash bin
-		std::array<std::unordered_map<u64, std::pair<block, u64>>, 4> localMasks;
+		std::array<std::unordered_map<u64, std::pair<block, u64>>, 3> localMasks;
 		//store the masks of elements that map to bin by h0
 		localMasks[0].reserve(mBins.mBinCount); //upper bound of # mask
 		//store the masks of elements that map to bin by h1
 		localMasks[1].reserve(mBins.mBinCount);
 		//store the masks of elements that map to bin by h2
 		localMasks[2].reserve(mBins.mBinCount);
-		//store the masks for stash bin
-		localMasks[3].reserve(mNumStash);
+
+		std::unique_ptr<ByteStream> locaStashlMasks(new ByteStream());
+		locaStashlMasks->resize(mNumStash* maskSize);
 
 
 		//======================Bucket BINs (not stash)==========================
@@ -221,6 +222,7 @@ namespace bOPRF
 					//compute my mask
 					sha1.Reset();
 					sha1.Update((u8*)&bIdx, sizeof(u64));
+					sha1.Update((u8*)&item.mHashIdx, sizeof(item.mHashIdx)); //
 					sha1.Update((u8*)&mSSOtMessages[bIdx][0], codeWordSize);
 					sha1.Final(hashBuff);
 
@@ -328,13 +330,8 @@ namespace bOPRF
 				sha1.Update((u8*)&otIdx, sizeof(u64));
 				sha1.Update((u8*)&mSSOtMessages[otIdx][0], codeWordSize);
 				sha1.Final(hashBuff);
-				memcpy(&mask, hashBuff, maskSize);
-
-				//NOTE: if the key of localMask have type u64, change
-				//localMasks.emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
-
-				 //put the mask into corresponding unordered_map					
-				localMasks[4].emplace(*(u64*)&mask, std::pair<block, u64>(mask, item.mIdx));
+				
+				memcpy(locaStashlMasks->data() + i * maskSize, hashBuff, maskSize);
 			}
 			else
 			{
@@ -350,11 +347,10 @@ namespace bOPRF
 		{
 			ByteStream recvBuff;
 			chl.recv(recvBuff);
-			if (localMasks[3].size() != 0)
+			if (mBins.mStash[sBuffIdx].isEmpty()== false)
 			{
 				// double check the size.
 				auto cntMask = mN;
-
 				gTimer.setTimePoint("Online.MaskReceived from STASH");
 				if (recvBuff.size() != cntMask* maskSize)
 				{
@@ -363,43 +359,17 @@ namespace bOPRF
 				}
 
 				auto theirMasks = recvBuff.data();
-				if (maskSize >= 8)
-				{
-					//if masksize>=8, we can check 64(8*8) bits of key from the map first by table-lookup
 					for (u64 i = 0; i < cntMask; ++i)
 					{
-						auto& msk = *(u64*)(theirMasks);
-
-						// check 64 first bits
-						auto match = localMasks[3].find(msk);
-
-						//if match, check for whole bits
-						if (match != localMasks[3].end())
-						{
-							if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
+						//check stash
+							if (memcmp(theirMasks, locaStashlMasks->data()+ sBuffIdx*maskSize, maskSize) == 0) 
 							{
-								mIntersection.push_back(match->second.second);
-								//	Log::out << "#id: " << match->second.second << Log::endl;
-							}
-						}
-						theirMasks += maskSize;
-					}
-				}
-				else
-				{
-					for (u64 i = 0; i < cntMask; ++i)
-					{
-						for (auto match = localMasks[sBuffIdx].begin(); match != localMasks[sBuffIdx].end(); ++match)
-						{
-							if (memcmp(theirMasks, &match->second.first, maskSize) == 0) // check full mask
-							{
-								mIntersection.push_back(match->second.second);
+								mIntersection.push_back(mBins.mStash[sBuffIdx].mIdx);
 								//Log::out << "#id: " << match->second.second << Log::endl;
 							}
-						}
+						
 						theirMasks += maskSize;
-					}
-				}
+					}				
 			}
 		}
 

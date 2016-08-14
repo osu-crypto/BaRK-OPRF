@@ -181,6 +181,7 @@ namespace bOPRF
 
 					sha1.Reset();
 					sha1.Update((u8*)&bIdx, sizeof(bIdx));
+					sha1.Update((u8*)&bin.mItems[i].mHashIdx, sizeof(bin.mItems[i].mHashIdx)); //add hash index 
 					sha1.Update((u8*)&sum, codeWordSize);
 					sha1.Final(hashBuff);
 

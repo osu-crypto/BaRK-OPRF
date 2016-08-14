@@ -221,8 +221,7 @@ namespace bOPRF
 
 					//compute my mask
 					sha1.Reset();
-					sha1.Update((u8*)&bIdx, sizeof(u64));
-					sha1.Update((u8*)&item.mHashIdx, sizeof(item.mHashIdx)); //
+					sha1.Update((u8*)&item.mHashIdx, sizeof(u64)); //
 					sha1.Update((u8*)&mSSOtMessages[bIdx][0], codeWordSize);
 					sha1.Final(hashBuff);
 
@@ -327,7 +326,6 @@ namespace bOPRF
 					^ mSSOtMessages[i][1];
 
 				sha1.Reset();
-				sha1.Update((u8*)&otIdx, sizeof(u64));
 				sha1.Update((u8*)&mSSOtMessages[otIdx][0], codeWordSize);
 				sha1.Final(hashBuff);
 				

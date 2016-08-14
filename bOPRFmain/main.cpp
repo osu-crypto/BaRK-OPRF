@@ -280,8 +280,8 @@ void BopRecv()
 			offlineTimeTot += offlineTime;
 			onlineTimeTot += online;
 			//output
-			/*Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
-			Log::out << "#Expected Intersection: " << rand << Log::endl;*/
+			//Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
+			//Log::out << "#Expected Intersection: " << rand << Log::endl;
 			Log::out << setSize << "\t\t" << offlineTime << "\t\t" << online << Log::endl;
 
 		}

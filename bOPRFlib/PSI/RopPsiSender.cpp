@@ -180,8 +180,7 @@ namespace bOPRF
 					auto sum = mPsiRecvSSOtMessages[bIdx] ^ ((theirCorrOT[j] ^ codeWord) & blk448Choice);
 
 					sha1.Reset();
-					sha1.Update((u8*)&bIdx, sizeof(bIdx));
-					sha1.Update((u8*)&bin.mItems[i].mHashIdx, sizeof(bin.mItems[i].mHashIdx)); //add hash index 
+					sha1.Update((u8*)&bin.mItems[i].mHashIdx, sizeof(u64)); //add hash index 
 					sha1.Update((u8*)&sum, codeWordSize);
 					sha1.Final(hashBuff);
 
@@ -251,7 +250,6 @@ namespace bOPRF
 
 
 					sha1.Reset();
-					sha1.Update((u8*)&otIdx, sizeof(otIdx));
 					sha1.Update((u8*)&codeWord, codeWordSize);
 					sha1.Final(hashBuff);
 

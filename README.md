@@ -1,5 +1,5 @@
 # Batched Oblivious PRF
-This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://...)]. Our code utilizes some parts of the [`libPSI`] (https://github.com/osu-crypto/libPSI) framework (OT extension) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. For any questions related to the implementation, please contact Ni Trieu at trieun at oregonstate dot edu
+This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://eprint.iacr.org/2016/799)]. Our code utilizes some parts of the [`libPSI`] (https://github.com/osu-crypto/libPSI) framework (OT extension) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. For any questions related to the implementation, please contact Ni Trieu at trieun at oregonstate dot edu
 
 ## Abstract
 ---
@@ -44,9 +44,3 @@ On the Sender's terminal, run:
 On the Receiver's terminal, run:
 	
 	./bOPRFmain.exe -r 1
-### NOTE
-Currently, we implement bOPRF and PSI in the same module. We plan to separate the code for each problem shortly. We will also consider multi-threaded implementation in our future work.
-## References
----
-[1] 
-[2]

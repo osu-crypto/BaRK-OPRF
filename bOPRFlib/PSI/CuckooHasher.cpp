@@ -47,12 +47,13 @@ namespace bOPRF
 		Log::out << Log::unlock;
 	}
 
-	void CuckooHasher::init(u64 n)
+	void CuckooHasher::init(u64 cuckooSize, u64 simpleSize)
 	{
-		mN = n;
-		mBinCount = 1.2*n;
-		mMaxStashSize = get_stash_size(n);
-		mSendersMaxBinSize = get_bin_size(n);
+		mCuckooSize = cuckooSize;
+		mSimpleSize = simpleSize;
+		mBinCount = 1.2*cuckooSize;
+		mMaxStashSize = get_stash_size(cuckooSize);
+		mSendersMaxBinSize = get_bin_size(cuckooSize, simpleSize);
 		mBins.resize(mBinCount);
 	}
 
@@ -72,7 +73,7 @@ namespace bOPRF
 			mBins[addr].mHashIdx = hashIdx;
 
 		}
-		else if(numTries <mN) 
+		else if(numTries <mCuckooSize) 
 		{
 			// mN times => evict  
 			u64 evictIdx = mBins[addr].mIdx;

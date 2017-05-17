@@ -19,9 +19,4 @@
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="UnitTests.h">
-      <Filter>Source Files\Header Files</Filter>
-    </ClInclude>
-  </ItemGroup>
 </Project>

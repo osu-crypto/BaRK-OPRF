@@ -16,16 +16,17 @@ namespace bOPRF
 	}
 	extern std::string hexString(u8* data, u64 length);
 
-	void BopPsiSender::init(u64 n, u64 statSec, Channel & chl0, SSOtExtSender& ots, block seed)
+	void BopPsiSender::init(u64 senderSize, u64 recverSize, u64 statSec, Channel & chl0, SSOtExtSender& ots, block seed)
 	{
-		init(n, statSec, { &chl0 }, ots, seed);
+		init(senderSize, recverSize, statSec, { &chl0 }, ots, seed);
 	}
 
-	void BopPsiSender::init(u64 n, u64 statSec, const std::vector<Channel*>& chls, SSOtExtSender& otSend, block seed)
+	void BopPsiSender::init(u64 senderSize, u64 recverSize, u64 statSec, const std::vector<Channel*>& chls, SSOtExtSender& otSend, block seed)
 	{
 		mStatSecParam = statSec;
-		mN = n;
-		mNumStash = get_stash_size(n);
+		mSenderSize = senderSize;
+		mRecverSize = recverSize;
+		mNumStash = get_stash_size(recverSize);
 
 		// we need a random hash function, so both commit to a seed and then decommit later
 		PRNG prngHashing(seed);
@@ -39,7 +40,7 @@ namespace bOPRF
 		chl0.asyncRecv(&theirHashingSeeds, sizeof(block));
 
 		// init Simple hash
-		mBins.init(n);
+		mBins.init(mRecverSize, mSenderSize);
 
 		mPsiRecvSSOtMessages.resize(mBins.mBinCount + mNumStash);
 
@@ -70,7 +71,7 @@ namespace bOPRF
 
 	void BopPsiSender::sendInput(std::vector<block>& inputs, const std::vector<Channel*>& chls)
 	{
-		if (inputs.size() != mN)
+		if (inputs.size() != mSenderSize)
 			throw std::runtime_error("rt error at " LOCATION);
 
 
@@ -79,8 +80,8 @@ namespace bOPRF
 		auto& chl = *chls[0];
 		SHA1 sha1;
 		u8 hashBuff[SHA1::HashSize];
-		u64 maskSize = get_mask_size(inputs.size());
-		u64 codeWordSize = get_codeword_size(inputs.size()); //by byte
+		u64 maskSize = get_mask_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
+		u64 codeWordSize = get_codeword_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
 
 		//compute PRC
 
@@ -106,32 +107,32 @@ namespace bOPRF
 		}
 
 		gTimer.setTimePoint("S Online.PRC done");
-		
+
 		//insert element into bin
 		mBins.insertItems(aesHashBuffs);
 		//mBins.print();
 
 		//OT value from office phasing	
 		auto& blk448Choice = mSSOtChoice.getArrayView<blockBop>()[0];
-		blockBop codeWord;		
-		
+		blockBop codeWord;
+
 		//======================Bucket BINs (not stash)==========================
 
-		u64 cntMask = mBins.mN;	
-		std::unique_ptr<ByteStream> myMaskBuff1(new ByteStream()); 
+		//u64 cntMask = mBins.mN;
+		std::unique_ptr<ByteStream> myMaskBuff1(new ByteStream());
 		std::unique_ptr<ByteStream> myMaskBuff2(new ByteStream());
-		std::unique_ptr<ByteStream> myMaskBuff3(new ByteStream());		
-		myMaskBuff1->resize(cntMask* maskSize);
-		myMaskBuff2->resize(cntMask* maskSize);
-		myMaskBuff3->resize(cntMask* maskSize);
+		std::unique_ptr<ByteStream> myMaskBuff3(new ByteStream());
+		myMaskBuff1->resize(mSenderSize* maskSize);
+		myMaskBuff2->resize(mSenderSize* maskSize);
+		myMaskBuff3->resize(mSenderSize* maskSize);
 
 		//create permute array to add my mask in the permuted positions
-		std::array<std::vector<u64>,3>permute;
+		std::array<std::vector<u64>, 3>permute;
 		int idxPermuteDone[3];
-		for (u64 j = 0;  j < 3; j++)
+		for (u64 j = 0; j < 3; j++)
 		{
-			permute[j].resize(cntMask);
-			for (u64 i = 0; i < cntMask; i++)
+			permute[j].resize(mSenderSize);
+			for (u64 i = 0; i < mSenderSize; i++)
 			{
 				permute[j][i] = i;
 			}
@@ -160,7 +161,7 @@ namespace bOPRF
 			// check the size
 			if (theirCorrOTMasksBuff.size() != sizeof(blockBop)*currentStepSize)
 				throw std::runtime_error("rt error at " LOCATION);
-			
+
 			auto theirCorrOT = theirCorrOTMasksBuff.getArrayView<blockBop>();
 
 			// loop all the bins in this step.
@@ -168,41 +169,41 @@ namespace bOPRF
 			{
 				// current bin.
 				auto& bin = mBins.mBins[bIdx];
-				
+
 				// for each item, hash it, encode then hash it again. 
-				for (u64 i = 0; i < bin.mSize; ++i)
+				for (u64 i = 0; i < mBins.mBinSizes[bIdx]; ++i)
 				{
-					codeWord.elem[0] = aesHashBuffs[0][bin.mItems[i].mIdx];
-					codeWord.elem[1] = aesHashBuffs[1][bin.mItems[i].mIdx];
-					codeWord.elem[2] = aesHashBuffs[2][bin.mItems[i].mIdx];
-					codeWord.elem[3] = aesHashBuffs[3][bin.mItems[i].mIdx];
+					codeWord.elem[0] = aesHashBuffs[0][bin[i].mIdx];
+					codeWord.elem[1] = aesHashBuffs[1][bin[i].mIdx];
+					codeWord.elem[2] = aesHashBuffs[2][bin[i].mIdx];
+					codeWord.elem[3] = aesHashBuffs[3][bin[i].mIdx];
 
 					auto sum = mPsiRecvSSOtMessages[bIdx] ^ ((theirCorrOT[j] ^ codeWord) & blk448Choice);
 
 					sha1.Reset();
-					sha1.Update((u8*)&bin.mItems[i].mHashIdx, sizeof(u64)); //add hash index 
+					sha1.Update((u8*)&bin[i].mHashIdx, sizeof(u64)); //add hash index 
 					sha1.Update((u8*)&sum, codeWordSize);
 					sha1.Final(hashBuff);
 
 					//put the mask into corresponding buff at the permuted position
-					if (bin.mItems[i].mHashIdx == 0) 	//buff 1 for hash index 0		
+					if (bin[i].mHashIdx == 0) 	//buff 1 for hash index 0		
 						memcpy(myMaskBuff1->data() + permute[0][idxPermuteDone[0]++] * maskSize, hashBuff, maskSize);
-					else if (bin.mItems[i].mHashIdx == 1)//buff 2 for hash index 1		
+					else if (bin[i].mHashIdx == 1)//buff 2 for hash index 1		
 						memcpy(myMaskBuff2->data() + permute[1][idxPermuteDone[1]++] * maskSize, hashBuff, maskSize);
-					else if (bin.mItems[i].mHashIdx == 2)//buff 3 for hash index 2
+					else if (bin[i].mHashIdx == 2)//buff 3 for hash index 2
 						memcpy(myMaskBuff3->data() + permute[2][idxPermuteDone[2]++] * maskSize, hashBuff, maskSize);
 				}
 			}
 		}
 		gTimer.setTimePoint("S Online.computeBucketMask done");
 		//double-check
-		if (cntMask != myMaskBuff1->size() / maskSize 
-			|| cntMask != myMaskBuff2->size() / maskSize
-			|| cntMask != myMaskBuff3->size() / maskSize)
-		{
-			Log::out << "myMaskByteIter != myMaskBuff->data() + myMaskBuff->size()" << Log::endl;
-			throw std::runtime_error("rt error at " LOCATION);
-		}
+		//if (cntMask != myMaskBuff1->size() / maskSize
+		//	|| cntMask != myMaskBuff2->size() / maskSize
+		//	|| cntMask != myMaskBuff3->size() / maskSize)
+		//{
+		//	Log::out << "myMaskByteIter != myMaskBuff->data() + myMaskBuff->size()" << Log::endl;
+		//	throw std::runtime_error("rt error at " LOCATION);
+		//}
 		chl.asyncSend(std::move(myMaskBuff1));
 		chl.asyncSend(std::move(myMaskBuff2));
 		chl.asyncSend(std::move(myMaskBuff3));
@@ -214,58 +215,52 @@ namespace bOPRF
 		//receive theirStashCorrOTMasksBuff
 		ByteStream theirStashCorrOTMasksBuff;
 		chl.recv(theirStashCorrOTMasksBuff);
-		auto theirStashCorrOT = theirStashCorrOTMasksBuff.getArrayView<blockBop>();		
+		auto theirStashCorrOT = theirStashCorrOTMasksBuff.getArrayView<blockBop>();
 		if (theirStashCorrOT.size() != mNumStash)
-			throw std::runtime_error("rt error at " LOCATION);		
+			throw std::runtime_error("rt error at " LOCATION);
 
 		// now compute mask for each of the stash elements
 		for (u64 stashIdx = 0, otIdx = mBins.mBinCount; stashIdx < mNumStash; ++stashIdx, ++otIdx)
 		{
 			std::unique_ptr<ByteStream> myStashMasksBuff(new ByteStream());
-			myStashMasksBuff->resize(cntMask* maskSize);
-			
-			cntMask = mN;
-			std::vector<u64> stashPermute(cntMask);
+			myStashMasksBuff->resize(mSenderSize* maskSize);
+
+			//cntMask = mSenderSize;
+			std::vector<u64> stashPermute(mSenderSize);
 			int idxStashDone = 0;
-			for (u64 i = 0; i < cntMask; i++)
+			for (u64 i = 0; i < mSenderSize; i++)
 				stashPermute[i] = i;
 
 			//permute position
 			std::shuffle(stashPermute.begin(), stashPermute.end(), prng);
 
 			//compute mask
-			for (u64 stepIdx = 0; stepIdx < inputs.size(); stepIdx += stepSize)
+			for (u64 i = 0; i < inputs.size(); ++i)
 			{
-				auto currentStepSize = std::min(stepSize, inputs.size() - stepIdx);
-				auto stepEnd = stepIdx + currentStepSize;
+				codeWord.elem[0] = aesHashBuffs[0][i];
+				codeWord.elem[1] = aesHashBuffs[1][i];
+				codeWord.elem[2] = aesHashBuffs[2][i];
+				codeWord.elem[3] = aesHashBuffs[3][i];
 
-				for (u64 i = stepIdx; i < stepEnd; ++i)
-				{
-					codeWord.elem[0] = aesHashBuffs[0][i];
-					codeWord.elem[1] = aesHashBuffs[1][i];
-					codeWord.elem[2] = aesHashBuffs[2][i];
-					codeWord.elem[3] = aesHashBuffs[3][i];
-
-					codeWord = mPsiRecvSSOtMessages[stashIdx] ^ ((theirStashCorrOT[stashIdx] ^ codeWord) & blk448Choice);
+				codeWord = mPsiRecvSSOtMessages[stashIdx] ^ ((theirStashCorrOT[stashIdx] ^ codeWord) & blk448Choice);
 
 
-					sha1.Reset();
-					sha1.Update((u8*)&codeWord, codeWordSize);
-					sha1.Final(hashBuff);
+				sha1.Reset();
+				sha1.Update((u8*)&codeWord, codeWordSize);
+				sha1.Final(hashBuff);
 
-					// copy mask into the buffer in permuted pos
-					memcpy(myStashMasksBuff->data() + stashPermute[idxStashDone++] * maskSize, hashBuff, maskSize);
-				}
+				// copy mask into the buffer in permuted pos
+				memcpy(myStashMasksBuff->data() + stashPermute[idxStashDone++] * maskSize, hashBuff, maskSize);
 			}
 
 			//check the size of mask
-			if (cntMask != myStashMasksBuff->size() / maskSize)
+			if (mSenderSize != myStashMasksBuff->size() / maskSize)
 			{
 				Log::out << "myMaskByteIter != myMaskBuff->data() + myMaskBuff->size()" << Log::endl;
 				throw std::runtime_error("rt error at " LOCATION);
 			}
-			chl.asyncSend(std::move(myStashMasksBuff));	
-		}		
+			chl.asyncSend(std::move(myStashMasksBuff));
+		}
 	}
 }
 

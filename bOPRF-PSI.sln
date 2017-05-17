@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio 15
+VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionFolder", "{5280458E-A3DB-4965-9A35-5FB0A9F9124D}"
 	ProjectSection(SolutionItems) = preProject
@@ -11,6 +11,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFolder", "SolutionF
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bOPRFmain", "bOPRFmain\bOPRFmain.vcxproj", "{C81DC04B-A0F0-4B77-8DCE-C8190E629467}"
+	ProjectSection(ProjectDependencies) = postProject
+		{4B3D93AF-B008-452D-B1BC-CACC67C3DC27} = {4B3D93AF-B008-452D-B1BC-CACC67C3DC27}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "bOPRFlib", "bOPRFlib\bOPRFlib.vcxproj", "{4B3D93AF-B008-452D-B1BC-CACC67C3DC27}"
 EndProject
@@ -31,7 +34,6 @@ Global
 		{4B3D93AF-B008-452D-B1BC-CACC67C3DC27}.Release|x64.ActiveCfg = Release|x64
 		{4B3D93AF-B008-452D-B1BC-CACC67C3DC27}.Release|x64.Build.0 = Release|x64
 		{72427940-1136-4BFA-8634-713FBD9A2B0B}.Debug|x64.ActiveCfg = Debug|x64
-		{72427940-1136-4BFA-8634-713FBD9A2B0B}.Debug|x64.Build.0 = Debug|x64
 		{72427940-1136-4BFA-8634-713FBD9A2B0B}.Release|x64.ActiveCfg = Release|x64
 		{72427940-1136-4BFA-8634-713FBD9A2B0B}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection

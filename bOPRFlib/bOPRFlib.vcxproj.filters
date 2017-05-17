@@ -144,13 +144,13 @@
     <ClCompile Include="OT\IknpOtExtSender4k.cpp">
       <Filter>Source Files\PSI</Filter>
     </ClCompile>
-    <ClCompile Include="PSI\RopPsiSender.cpp">
-      <Filter>Source Files\PSI</Filter>
-    </ClCompile>
     <ClCompile Include="OT\SSOTReceiver.cpp">
       <Filter>Source Files\PSI</Filter>
     </ClCompile>
     <ClCompile Include="OT\SSOTSender.cpp">
+      <Filter>Source Files\PSI</Filter>
+    </ClCompile>
+    <ClCompile Include="PSI\BopPsiSender.cpp">
       <Filter>Source Files\PSI</Filter>
     </ClCompile>
   </ItemGroup>
@@ -283,6 +283,12 @@
     </ClInclude>
     <ClInclude Include="OT\SSOTSender.h">
       <Filter>Header Files\PSI</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\Matrix.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\MatrixView.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

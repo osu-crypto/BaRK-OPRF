@@ -2,6 +2,7 @@
 #include "Common/Defines.h"
 #include "Common/BitVector.h"
 #include "Common/ArrayView.h"
+#include "Common/Matrix.h"
 
 namespace bOPRF
 {
@@ -18,24 +19,27 @@ namespace bOPRF
 			u64 mHashIdx;
 		};
 
-		struct Bin
-		{
+		//struct Bin
+		//{
 
-			Bin() :mSize(0) {}
-
-			std::array<item, 21> mItems;
-			u64 mSize;
-
-		};
+		//	Bin() :mSize(0) {}
 
 
-		u64 mBinCount, mMaxBinSize, mN;
-		std::vector<Bin> mBins;
+		//	//Matrix<item> mItems;
+		//	//std::array<item, 21> mItems;
+		//	u64 mSize;
+
+		//};
+
+
+		u64 mBinCount, mMaxBinSize, mSimpleSize, mCuckooSize;
+		Matrix<item> mBins;
+		std::vector<u64> mBinSizes;
 		block mHashSeed;
 		void print() const;
 
 	
-		void init(u64 n); 
+		void init(u64 cuckooSize, u64 simpleSize); 
 		u64 insertItems(std::array<std::vector<block>,4> hashs);
 
 	};

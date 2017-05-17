@@ -141,30 +141,31 @@ void BopSender()
 
 	pingTest(*sendChls[0], true);
 
+
+	u64 recverSize = 10;
 	for (auto pow : { 8,12,16,20,24 })
 	{
 
-		u64 setSize = (1 << pow), psiSecParam = 40;
+		u64 senderSize = (1 << pow), psiSecParam = 40;
 		u64 offlineTimeTot(0);
 		u64 onlineTimeTot(0);
 
 		for (u64 j = 0; j < numTrial; ++j)
 		{
 			//u64 repeatCount = 4;
-			u64 setSize = (1 << pow), psiSecParam = 40;
 			PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
 			//	PRNG prngSame2(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
 			PRNG prngDiff(_mm_set_epi32(43465, 32254, 2435, 2398045));
 
-			std::vector<block> sendSet(setSize);
+			std::vector<block> sendSet(senderSize);
 
-			u64 rand = prngSame.get_u32() % setSize;
+			u64 rand = prngSame.get_u32() % senderSize;
 
 			for (u64 i = 0; i < rand; ++i)
 			{
 				sendSet[i] = prngSame.get_block();
 			}
-			for (u64 i = rand; i < setSize; ++i)
+			for (u64 i = rand; i < senderSize; ++i)
 			{
 				sendSet[i] = prngDiff.get_block();
 			}
@@ -181,7 +182,7 @@ void BopSender()
 
 
 			gTimer.reset();
-			sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
+			sendPSIs.init(senderSize, recverSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
 
 
 			sendPSIs.sendInput(sendSet, sendChls);
@@ -230,6 +231,8 @@ void BopRecv()
 	//8,12,16,
 	Log::out << "--------------------------\n";
 
+	u64 recverSize = 10;
+
 	for (auto pow : { 8,12,16,20,24 })
 		//for (auto pow : { 16,20 })
 	{
@@ -269,7 +272,7 @@ void BopRecv()
 			Timer timer;
 			timer.setTimePoint("start");
 			auto start = timer.setTimePoint("start");
-			recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
+			recvPSIs.init(setSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
 			auto mid = timer.setTimePoint("init");
 			recvPSIs.sendInput(recvSet, recvChls);
 			//timer.setTimePoint("Done");
@@ -315,16 +318,17 @@ void BopTest()
 	Log::out << "Test()" << Log::endl;
 
 	u64 numThreads = 1;
-	u64 setSize = (1 << 8), psiSecParam = 40;// , numThreads(1);
+	u64 senderSize = (1 << 8), psiSecParam = 40;// , numThreads(1);
+	u64 recverSize = (1 << 16);// , numThreads(1);
 
 	//generate data
 	PRNG prng(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
 	PRNG prngDiff1(_mm_set_epi32(434653, 23, 11, 56));
 	PRNG prngDiff2(_mm_set_epi32(43465, 32254, 2435, 2398045));
 
-	std::vector<block> sendSet(setSize), recvSet(setSize);
+	std::vector<block> sendSet(senderSize), recvSet(recverSize);
 
-	u64 rand = setSize / 4;
+	u64 rand = std::min(senderSize, recverSize) / 4;
 	//same input value =>intersection
 	for (u64 i = 0; i < rand; ++i)
 	{
@@ -333,11 +337,11 @@ void BopTest()
 	}
 
 	//different input value 
-	for (u64 i = rand; i < setSize; ++i)
+	for (u64 i = rand; i < senderSize; ++i)
 	{
 		sendSet[i] = prngDiff1.get_block();
 	}
-	for (u64 i = rand; i < setSize; ++i)
+	for (u64 i = rand; i < recverSize; ++i)
 	{
 		recvSet[i] = prngDiff2.get_block();
 	}
@@ -372,7 +376,7 @@ void BopTest()
 	std::thread thrd([&]() {
 		PRNG prng(bb);
 		//sender thread
-		sendPSIs.init(setSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
+		sendPSIs.init(senderSize, recverSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
 		sendPSIs.sendInput(sendSet, sendChls);
 	});
 
@@ -381,7 +385,7 @@ void BopTest()
 	gTimer.reset();
 	//receiver thread
 	auto start = gTimer.setTimePoint("start");
-	recvPSIs.init(setSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
+	recvPSIs.init(senderSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
 	recvPSIs.sendInput(recvSet, recvChls);
 	auto end = gTimer.setTimePoint("done");
 
@@ -397,7 +401,7 @@ void BopTest()
 
 	if (recvPSIs.mIntersection.size() != rand)
 	{
-		Log::out << "\nbad intersection,  expecting full set of size  " << setSize << " but got " << recvPSIs.mIntersection.size() << Log::endl;
+		Log::out << "\nbad intersection,  expecting full set of size  " << senderSize << " but got " << recvPSIs.mIntersection.size() << Log::endl;
 		//throw std::runtime_error(std::string("bad intersection, "));
 	}
 	else

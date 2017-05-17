@@ -33,14 +33,14 @@ namespace bOPRF
 		}; 
 
 
-		u64 mBinCount, mN, mMaxStashSize, mSendersMaxBinSize, mTotalTries;
+		u64 mBinCount, mCuckooSize, mSimpleSize, mMaxStashSize, mSendersMaxBinSize, mTotalTries;
 
 		std::vector<Bin> mBins;
 		std::vector<Bin> mStash;
 		
 		void print() const;
 
-		void init(u64 n);
+		void init(u64 cuckooSize, u64 simpleSize);
 		void insertItem(u64 IdxItem, std::array<std::vector<block>, 4>& hashs, u64 hashIdx = 0, u64 numTries = 0);
 		void insertItems(std::array<std::vector<block>,4>& hashs);
 	};

@@ -37,19 +37,20 @@ namespace bOPRF
 	{
 	}
 
-	void BopPsiReceiver::init(u64 n, u64 statSecParam, Channel & chl0, SSOtExtReceiver& ots, block seed)
+	void BopPsiReceiver::init(u64 senderSize, u64 recverSize, u64 statSecParam, Channel & chl0, SSOtExtReceiver& ots, block seed)
 	{
-		init(n, statSecParam, { &chl0 }, ots, seed);
+		init(senderSize, recverSize, statSecParam, { &chl0 }, ots, seed);
 	}
 
 
-	void BopPsiReceiver::init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv, block seed)
+	void BopPsiReceiver::init(u64 senderSize, u64 recverSize, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtReceiver& otRecv, block seed)
 	{
 
 		mStatSecParam = statSecParam;
-		mN = n;
+		mSenderSize = senderSize;
+		mRecverSize = recverSize;
 
-		mNumStash = get_stash_size(n);
+		mNumStash = get_stash_size(recverSize);
 
 		gTimer.setTimePoint("Init.start");
 		PRNG prngHashing(seed);
@@ -67,7 +68,7 @@ namespace bOPRF
 
 
 		// init Cuckoo hash
-		mBins.init(n);
+		mBins.init(mRecverSize, mSenderSize);
 
 		// makes codeword for each bins
 		mSSOtMessages.resize(mBins.mBinCount + mNumStash);
@@ -122,7 +123,7 @@ namespace bOPRF
 //		typedef std::conditional<leq1, u32, u64>::type uMask;
 
 		// check that the number of inputs is as expected.
-		if (inputs.size() != mN)
+		if (inputs.size() != mRecverSize)
 			throw std::runtime_error("inputs.size() != mN");
 		gTimer.setTimePoint("R Online.Start");
 
@@ -135,8 +136,8 @@ namespace bOPRF
 		//random seed
 		PRNG prng(_mm_set_epi32(42534612345, 34557734565, 211234435, 23987045));
 
-		u64 codeWordSize = get_codeword_size(inputs.size()); //by byte
-		u64 maskSize = get_mask_size(inputs.size()); //by byte
+		u64 codeWordSize = get_codeword_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
+		u64 maskSize = get_mask_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
 		blockBop codeWord;
 
 		//hash all items, use for: 1) arrage each item to bin using Cuckoo; 
@@ -250,9 +251,8 @@ namespace bOPRF
 			ByteStream recvBuff;
 			chl.recv(recvBuff);
 
-			// double check the size.
-			u64 cntMask = mBins.mN;
-			if (recvBuff.size() != cntMask* maskSize)
+			// double check the size. 
+			if (recvBuff.size() != mSenderSize* maskSize)
 			{
 				Log::out << "recvBuff.size() != expectedSize" << Log::endl;
 				throw std::runtime_error("rt error at " LOCATION);
@@ -264,7 +264,7 @@ namespace bOPRF
 			if (maskSize >= 8)
 			{
 				//if masksize>=8, we can check 64 bits of key from the map first
-				for (u64 i = 0; i < cntMask; ++i)
+				for (u64 i = 0; i < mSenderSize; ++i)
 				{
 					auto& msk = *(u64*)(theirMasks);
 
@@ -285,7 +285,7 @@ namespace bOPRF
 			}
 			else
 			{
-				for (u64 i = 0; i < cntMask; ++i)
+				for (u64 i = 0; i < mSenderSize; ++i)
 				{
 					for (auto match = localMasks[buffIdx].begin(); match != localMasks[buffIdx].end(); ++match)
 					{
@@ -348,7 +348,7 @@ namespace bOPRF
 			if (mBins.mStash[sBuffIdx].isEmpty()== false)
 			{
 				// double check the size.
-				auto cntMask = mN;
+				auto cntMask = mSenderSize;
 				gTimer.setTimePoint("Online.MaskReceived from STASH");
 				if (recvBuff.size() != cntMask* maskSize)
 				{

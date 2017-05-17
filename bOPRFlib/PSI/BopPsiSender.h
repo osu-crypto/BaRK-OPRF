@@ -17,7 +17,7 @@ namespace bOPRF
 		BopPsiSender();
 		~BopPsiSender();
 
-		u64 mN, mStatSecParam;
+		u64 mSenderSize, mRecverSize, mStatSecParam;
 		
 		//std::vector<SSOtPsiSender> mPsis;
 
@@ -32,8 +32,8 @@ namespace bOPRF
 
 		u64 mNumStash;
 
-		void init(u64 n, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtSender& otSender, block seed);
-		void init(u64 n, u64 statSecParam, Channel & chl0, SSOtExtSender& otSender, block seed);
+		void init(u64 senderSize, u64 recverSize, u64 statSecParam, const std::vector<Channel*>& chls, SSOtExtSender& otSender, block seed);
+		void init(u64 senderSize, u64 recverSize, u64 statSecParam, Channel & chl0, SSOtExtSender& otSender, block seed);
 
 		void sendInput(std::vector<block>& inputs, Channel& chl);
 		void sendInput(std::vector<block>& inputs, const std::vector<Channel*>& chls);

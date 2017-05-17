@@ -10,6 +10,7 @@
 #include "Common/Defines.h"
 #include "cryptopp/sha.h"
 
+
 namespace bOPRF {
 	class SHA1
 	{

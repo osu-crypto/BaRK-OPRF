@@ -31,11 +31,11 @@ namespace bOPRF
 		{
 			Log::out << "Bin #" << i << Log::endl;
 
-			Log::out << " contains " << mBins[i].mSize << " elements" << Log::endl;
+			Log::out << " contains " << mBinSizes[i] << " elements" << Log::endl;
 
-			for (u64 j = 0; j < mBins[i].mSize; ++j)
+			for (u64 j = 0; j < mBinSizes[i]; ++j)
 			{
-				Log::out << "    idx=" << mBins[i].mItems[j].mIdx << "  hIdx=" << mBins[i].mItems[j].mHashIdx << Log::endl;
+				Log::out << "    idx=" << mBins(i,j).mIdx << "  hIdx=" << mBins(i,j).mHashIdx << Log::endl;
 				//	Log::out << "    " << mBins[i].first[j] << "  " << mBins[i].second[j] << Log::endl;
 
 			}
@@ -47,12 +47,14 @@ namespace bOPRF
 		Log::out << Log::unlock;
 	}
 
-	void SimpleHasher::init(u64 n)
+	void SimpleHasher::init(u64 cuckooSize, u64 simpleSize)
 	{		
-		mN = n;
-		mBinCount = 1.2*n;
-		mMaxBinSize = get_bin_size(n);;
-		mBins.resize(mBinCount);
+		mSimpleSize = simpleSize;
+		mCuckooSize = cuckooSize;
+		mBinCount = 1.2*cuckooSize;
+		mMaxBinSize = get_bin_size(cuckooSize, simpleSize);
+		mBins.resize(mBinCount, mMaxBinSize);
+		mBinSizes.resize(mBinCount, 0);
 	}
 
 
@@ -67,10 +69,7 @@ namespace bOPRF
 
 		for (u64 i = 0; i < hashs[0].size(); ++i)
 		{
-			//Log::out << "  item[" << i << "] " << item << Log::endl;
-
 			u64 addr;
-			//std::array<u64, 2> idxs{ -1,-1 };
 			std::array<u64, 3> idxs{ -1,-1,-1 };
 
 			for (u64 j = 0; j < 3; ++j) {
@@ -78,19 +77,13 @@ namespace bOPRF
 				u64 xrHashVal = *(u64*)&hashs[j][i] % mBinCount;
 
 				addr = xrHashVal % mBinCount;
-				//cnt1++;
 
-				//if (std::find(idxs.begin(), idxs.end(), addr ) == idxs.end())
 				{
-					auto bb = mBins[addr].mSize;
-					//mBins[addr].mItems[bb].mValue = item;
-					mBins[addr].mItems[bb].mIdx  =i;
-					mBins[addr].mItems[bb].mHashIdx=j;
+					auto bb = mBinSizes[addr]++;
 
-					mBins[addr].mSize++;
+					mBins(addr, bb).mIdx  =i;
+					mBins(addr, bb).mHashIdx=j;
 					cnt++;
-
-					//idxs[j] = addr;
 				}
 			}
 		}	

@@ -135,48 +135,56 @@ namespace bOPRF {
 			return 6;
 		if (neles >= (1 << 8))
 			return 12;
-		
+
 		return 12; //other
-		
+
 		throw std::runtime_error("get_stash_size: rt error at " LOCATION);
 
 	}
-	u64 get_bin_size(u64 neles) {
-		if (neles >= (1 << 24))
-			return 28;
-		if (neles >= (1 << 20))
-			return 27;
-		if (neles >= (1 << 16))
-			return 26;
-		if (neles >= (1 << 12))
-			return 25;
-		if (neles >= (1 << 8))
-			return 24;
-	
-		return 24;  //other
+	u64 get_bin_size(u64 cuckooSize, u64 simpleSize) {
+		if (simpleSize == cuckooSize)
+		{
+
+			if (simpleSize >= (1 << 24))
+				return 28;
+			if (simpleSize >= (1 << 20))
+				return 27;
+			if (simpleSize >= (1 << 16))
+				return 26;
+			if (simpleSize >= (1 << 12))
+				return 25;
+			if (simpleSize >= (1 << 8))
+				return 24;
+
+			return 30;  //other
+		}
+		else
+		{
+			return simpleSize / cuckooSize + 16 + 2 * std::log2(simpleSize);
+		}
 
 		//throw std::runtime_error("get_bin_size: rt error at " LOCATION);
 	}
 
 	u64 get_codeword_size(u64 neles) {
 		if (neles >= (1 << 24))
-			return 448/8; // in byte
+			return 448 / 8; // in byte
 		if (neles >= (1 << 20))
-			return 448/8;
+			return 448 / 8;
 		if (neles >= (1 << 16))
-			return 440/8;
+			return 440 / 8;
 		if (neles >= (1 << 12))
-			return 432/8;
+			return 432 / 8;
 		if (neles >= (1 << 8))
-			return 424/8;
+			return 424 / 8;
 
-		return 424 /8;
+		return 424 / 8;
 
 		//throw std::runtime_error("get_codeword_size: rt error at " LOCATION);
 	}
 	u64 get_mask_size(u64 neles) {
 		if (neles >= (1 << 24))
-			return 88/8;  // in byte
+			return 88 / 8;  // in byte
 		if (neles >= (1 << 20))
 			return 80 / 8;
 		if (neles >= (1 << 16))
@@ -186,7 +194,7 @@ namespace bOPRF {
 		if (neles >= (1 << 8))
 			return 56 / 8;
 
-		return 56 /8;
+		return 56 / 8;
 		//return (40 + 2 * log(neles)) / 8;
 
 	//	throw std::runtime_error("get_codeword_size: rt error at " LOCATION);

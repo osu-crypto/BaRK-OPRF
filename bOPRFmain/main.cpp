@@ -142,53 +142,57 @@ void BopSender()
 	pingTest(*sendChls[0], true);
 
 
-	u64 recverSize = 10;
 	for (auto pow : { 8,12,16,20,24 })
 	{
 
-		u64 senderSize = (1 << pow), psiSecParam = 40;
-		u64 offlineTimeTot(0);
-		u64 onlineTimeTot(0);
-
-		for (u64 j = 0; j < numTrial; ++j)
+		for (auto recvPow : { 0, 5535, 11041 })
 		{
-			//u64 repeatCount = 4;
-			PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
-			//	PRNG prngSame2(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
-			PRNG prngDiff(_mm_set_epi32(43465, 32254, 2435, 2398045));
+			u64 senderSize = (1 << pow), psiSecParam = 40;
+			u64 recverSize = recvPow ? 1 << recvPow : senderSize;
 
-			std::vector<block> sendSet(senderSize);
+			u64 offlineTimeTot(0);
+			u64 onlineTimeTot(0);
 
-			u64 rand = prngSame.get_u32() % senderSize;
-
-			for (u64 i = 0; i < rand; ++i)
+			for (u64 j = 0; j < numTrial; ++j)
 			{
-				sendSet[i] = prngSame.get_block();
+				//u64 repeatCount = 4;
+				PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
+				//	PRNG prngSame2(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
+				PRNG prngDiff(_mm_set_epi32(43465, 32254, 2435, 2398045));
+
+				std::vector<block> sendSet(senderSize);
+
+				u64 rand = prngSame.get_u32() % senderSize;
+
+				for (u64 i = 0; i < rand; ++i)
+				{
+					sendSet[i] = prngSame.get_block();
+				}
+				for (u64 i = rand; i < senderSize; ++i)
+				{
+					sendSet[i] = prngDiff.get_block();
+				}
+				//std::shuffle(sendSet.begin(), sendSet.end(), prngSame);
+				SSOtExtSender OTSender0;
+
+
+				BopPsiSender sendPSIs;
+
+				u8 dumm[1];
+				sendChls[0]->asyncSend(dumm, 1);
+				sendChls[0]->recv(dumm, 1);
+				sendChls[0]->asyncSend(dumm, 1);
+
+
+				gTimer.reset();
+				sendPSIs.init(senderSize, recverSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
+
+
+				sendPSIs.sendInput(sendSet, sendChls);
+				//Log::out << "threads =  " << numThreads << Log::endl << gTimer << Log::endl << Log::endl << Log::endl;
+
+				u64 otIdx = 0;
 			}
-			for (u64 i = rand; i < senderSize; ++i)
-			{
-				sendSet[i] = prngDiff.get_block();
-			}
-			//std::shuffle(sendSet.begin(), sendSet.end(), prngSame);
-			SSOtExtSender OTSender0;
-
-
-			BopPsiSender sendPSIs;
-
-			u8 dumm[1];
-			sendChls[0]->asyncSend(dumm, 1);
-			sendChls[0]->recv(dumm, 1);
-			sendChls[0]->asyncSend(dumm, 1);
-
-
-			gTimer.reset();
-			sendPSIs.init(senderSize, recverSize, psiSecParam, *sendChls[0], OTSender0, OneBlock);
-
-
-			sendPSIs.sendInput(sendSet, sendChls);
-			//Log::out << "threads =  " << numThreads << Log::endl << gTimer << Log::endl << Log::endl << Log::endl;
-
-			u64 otIdx = 0;
 		}
 	}
 
@@ -231,75 +235,78 @@ void BopRecv()
 	//8,12,16,
 	Log::out << "--------------------------\n";
 
-	u64 recverSize = 10;
 
 	for (auto pow : { 8,12,16,20,24 })
-		//for (auto pow : { 16,20 })
 	{
-
-		u64 offlineTimeTot(0);
-		u64 onlineTimeTot(0);
-		u64 setSize = (1 << pow), psiSecParam = 40;
-
-		Log::out << "setSize" << "  |  " << "offline(ms)" << "  |  " << "online(ms)" << Log::endl;
-
-		for (u64 j = 0; j < numTrial; ++j)
+		for (auto recvPow : { 0, 5535, 11041 })
 		{
-			PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
-			PRNG prngDiff(_mm_set_epi32(434653, 23, 11, 56));
+			u64 sendSize = (1 << pow), psiSecParam = 40;
+			u64 recverSize = recvPow ? 1 << recvPow : sendSize;
 
-			std::vector<block> recvSet(setSize);
-			u64 rand = prngSame.get_u32() % setSize;
-			for (u64 i = 0; i < rand; ++i)
+
+			u64 offlineTimeTot(0);
+			u64 onlineTimeTot(0);
+
+			Log::out << "setSize" << "       |  " << "offline(ms)" << "  |  " << "online(ms)" << Log::endl;
+
+			for (u64 j = 0; j < numTrial; ++j)
 			{
-				recvSet[i] = prngSame.get_block();
+				PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
+				PRNG prngDiff(_mm_set_epi32(434653, 23, 11, 56));
+
+				std::vector<block> recvSet(sendSize);
+				u64 rand = prngSame.get_u32() % sendSize;
+				for (u64 i = 0; i < rand; ++i)
+				{
+					recvSet[i] = prngSame.get_block();
+				}
+
+				for (u64 i = rand; i < sendSize; ++i)
+				{
+					recvSet[i] = prngDiff.get_block();
+				}
+
+				SSOtExtReceiver OTRecver0;
+				BopPsiReceiver recvPSIs;
+
+				u8 dumm[1];
+				recvChls[0]->recv(dumm, 1);
+				recvChls[0]->asyncSend(dumm, 1);
+				recvChls[0]->recv(dumm, 1);
+
+				//gTimer.reset();
+				Timer timer;
+				timer.setTimePoint("start");
+				auto start = timer.setTimePoint("start");
+				recvPSIs.init(sendSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
+				auto mid = timer.setTimePoint("init");
+				recvPSIs.sendInput(recvSet, recvChls);
+				//timer.setTimePoint("Done");
+				auto end = timer.setTimePoint("done");
+
+				auto offlineTime = std::chrono::duration_cast<std::chrono::milliseconds>(mid - start).count();
+				auto online = std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count();
+				offlineTimeTot += offlineTime;
+				onlineTimeTot += online;
+				//output
+				//Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
+				//Log::out << "#Expected Intersection: " << rand << Log::endl;
+				Log::out << sendSize << "\t\t" << offlineTime << "\t\t" << online << Log::endl;
+
 			}
+			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
+			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
+			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
+			Log::out << "--------------------------\n";
 
-			for (u64 i = rand; i < setSize; ++i)
-			{
-				recvSet[i] = prngDiff.get_block();
-			}
-
-			SSOtExtReceiver OTRecver0;
-			BopPsiReceiver recvPSIs;			
-
-			u8 dumm[1];
-			recvChls[0]->recv(dumm, 1);
-			recvChls[0]->asyncSend(dumm, 1);
-			recvChls[0]->recv(dumm, 1);
-
-			//gTimer.reset();
-			Timer timer;
-			timer.setTimePoint("start");
-			auto start = timer.setTimePoint("start");
-			recvPSIs.init(setSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
-			auto mid = timer.setTimePoint("init");
-			recvPSIs.sendInput(recvSet, recvChls);
-			//timer.setTimePoint("Done");
-			auto end = timer.setTimePoint("done");
-
-			auto offlineTime = std::chrono::duration_cast<std::chrono::milliseconds>(mid - start).count();
-			auto online = std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count();
-			offlineTimeTot += offlineTime;
-			onlineTimeTot += online;
-			//output
-			//Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
-			//Log::out << "#Expected Intersection: " << rand << Log::endl;
-			Log::out << setSize << "\t\t" << offlineTime << "\t\t" << online << Log::endl;
+			total << "2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
+			total << "2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
+			total << "2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
+			total << "--------------------------\n";
 
 		}
-		Log::out << "2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
-		Log::out << "2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
-		Log::out << "2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
-		Log::out << "--------------------------\n";
-
-		total << "2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
-		total << "2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
-		total << "2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
-		total << "--------------------------\n";
 
 	}
-
 
 	for (u64 i = 0; i < numThreads; ++i)
 	{

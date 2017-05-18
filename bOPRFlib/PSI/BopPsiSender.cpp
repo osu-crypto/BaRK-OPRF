@@ -168,7 +168,7 @@ namespace bOPRF
 			for (u64 bIdx = stepIdx, j = 0; bIdx < stepEnd; ++bIdx, ++j)
 			{
 				// current bin.
-				auto& bin = mBins.mBins[bIdx];
+				auto bin = mBins.mBins[bIdx];
 
 				// for each item, hash it, encode then hash it again. 
 				for (u64 i = 0; i < mBins.mBinSizes[bIdx]; ++i)

@@ -142,10 +142,10 @@ void BopSender()
 	pingTest(*sendChls[0], true);
 
 
-	for (u64 pow : { 8,12,16,20,24 })
+	for (u64 pow : { 16,20,24 })
 	{
 
-		for (u64 recverSize : { 0, 5535, 11041 })
+		for (u64 recverSize : { 5535, 11041 })
 		{
 			u64 senderSize = (1 << pow), psiSecParam = 40;
 			recverSize = recverSize ? recverSize : senderSize;
@@ -236,9 +236,9 @@ void BopRecv()
 	std::cout << "--------------------------\n";
 
 
-	for (u64 pow : { 8,12,16,20,24 })
+	for (u64 pow : { 16,20,24 })
 	{
-		for (u64 recverSize : { 0, 5535, 11041 })
+		for (u64 recverSize : {  5535, 11041 })
 		{
 			u64 sendSize = (1 << pow), psiSecParam = 40;
 			recverSize = recverSize ? recverSize : sendSize;

@@ -142,7 +142,7 @@ namespace bOPRF {
 
 	}
 	u64 get_bin_size(u64 cuckooSize, u64 simpleSize) {
-		if (simpleSize == cuckooSize)
+		if (simpleSize <= cuckooSize)
 		{
 
 			if (simpleSize >= (1 << 24))
@@ -160,7 +160,7 @@ namespace bOPRF {
 		}
 		else
 		{
-			return simpleSize / cuckooSize + 16 + 2 * std::log2(simpleSize);
+			return simpleSize / cuckooSize + 16 + 4 * std::sqrt(simpleSize * std::log2(cuckooSize) / cuckooSize);
 		}
 
 		//throw std::runtime_error("get_bin_size: rt error at " LOCATION);

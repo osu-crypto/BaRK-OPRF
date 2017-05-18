@@ -31,7 +31,7 @@ void recverGetLatency(Channel& chl)
 	chl.asyncSend(dummy, 1);
 	chl.recv(dummy, 1);
 	auto end = timer.setTimePoint("");
-	Log::out << "latency: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << Log::endl;
+	std::cout << "latency: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
 }
 
 void pingTest(Channel& chl, bool sender)
@@ -50,7 +50,7 @@ void pingTest(Channel& chl, bool sender)
 			chl.recv(buff);
 			if (buff.size() != 1)
 			{
-				Log::out << std::string((char*)buff.data(), (char*)buff.data() + buff.size()) << Log::endl;
+				std::cout << std::string((char*)buff.data(), (char*)buff.data() + buff.size()) << std::endl;
 				throw std::runtime_error("");
 			}
 		}
@@ -60,7 +60,7 @@ void pingTest(Channel& chl, bool sender)
 
 		auto ping = std::chrono::duration_cast<std::chrono::microseconds>(recv - send).count() / count;
 
-		Log::out << "ping " << ping << " us" << Log::endl;
+		std::cout << "ping " << ping << " us" << std::endl;
 
 		send = timer.setTimePoint("");
 		chl.asyncSend(oneMB.data(), oneMB.size());
@@ -75,7 +75,7 @@ void pingTest(Channel& chl, bool sender)
 		if (buff.size() != oneMB.size()) throw std::runtime_error("");
 
 
-		Log::out << (8000000 / time) << " Mbps" << Log::endl;
+		std::cout << (8000000 / time) << " Mbps" << std::endl;
 	}
 	else
 	{
@@ -108,7 +108,7 @@ void pingTest(Channel& chl, bool sender)
 
 		double time = static_cast<double>(std::chrono::duration_cast<std::chrono::microseconds>(recv - send).count() - ping);
 
-		Log::out << (8000000 / time) << " Mbps" << Log::endl;
+		std::cout << (8000000 / time) << " Mbps" << std::endl;
 
 	}
 
@@ -116,13 +116,13 @@ void pingTest(Channel& chl, bool sender)
 
 void BopSender()
 {
-	Log::out << "BopSender()" << Log::endl;
+	std::cout << "BopSender()" << std::endl;
 	u64 numThreads = 1;
 	u64 numTrial(10);
 
 	std::fstream online, offline;
 
-	Log::out << "role  = sender (" << numThreads << ") SSOtPSI" << Log::endl;
+	std::cout << "role  = sender (" << numThreads << ") SSOtPSI" << std::endl;
 
 	// , numThreads(1);
 
@@ -142,13 +142,13 @@ void BopSender()
 	pingTest(*sendChls[0], true);
 
 
-	for (auto pow : { 8,12,16,20,24 })
+	for (u64 pow : { 8,12,16,20,24 })
 	{
 
-		for (auto recvPow : { 0, 5535, 11041 })
+		for (u64 recverSize : { 0, 5535, 11041 })
 		{
 			u64 senderSize = (1 << pow), psiSecParam = 40;
-			u64 recverSize = recvPow ? 1 << recvPow : senderSize;
+			recverSize = recverSize ? recverSize : senderSize;
 
 			u64 offlineTimeTot(0);
 			u64 onlineTimeTot(0);
@@ -162,7 +162,7 @@ void BopSender()
 
 				std::vector<block> sendSet(senderSize);
 
-				u64 rand = prngSame.get_u32() % senderSize;
+				u64 rand = prngSame.get_u32() % std::min(senderSize, recverSize);
 
 				for (u64 i = 0; i < rand; ++i)
 				{
@@ -189,7 +189,7 @@ void BopSender()
 
 
 				sendPSIs.sendInput(sendSet, sendChls);
-				//Log::out << "threads =  " << numThreads << Log::endl << gTimer << Log::endl << Log::endl << Log::endl;
+				//std::cout << "threads =  " << numThreads << std::endl << gTimer << std::endl << std::endl << std::endl;
 
 				u64 otIdx = 0;
 			}
@@ -209,7 +209,7 @@ void BopSender()
 
 void BopRecv()
 {
-	Log::out << "BopRecv()" << Log::endl;
+	std::cout << "BopRecv()" << std::endl;
 
 	u64 numThreads = 1;
 	//u64 repeatCount = 4;
@@ -231,37 +231,37 @@ void BopRecv()
 
 	recverGetLatency(*recvChls[0]);
 	pingTest(*recvChls[0], false);
-	Log::out << "role  = recv (" << numThreads << ") SSOtPSI" << Log::endl;
+	std::cout << "role  = recv (" << numThreads << ") SSOtPSI" << std::endl;
 	//8,12,16,
-	Log::out << "--------------------------\n";
+	std::cout << "--------------------------\n";
 
 
-	for (auto pow : { 8,12,16,20,24 })
+	for (u64 pow : { 8,12,16,20,24 })
 	{
-		for (auto recvPow : { 0, 5535, 11041 })
+		for (u64 recverSize : { 0, 5535, 11041 })
 		{
 			u64 sendSize = (1 << pow), psiSecParam = 40;
-			u64 recverSize = recvPow ? 1 << recvPow : sendSize;
+			recverSize = recverSize ? recverSize : sendSize;
 
 
 			u64 offlineTimeTot(0);
 			u64 onlineTimeTot(0);
 
-			Log::out << "setSize" << "       |  " << "offline(ms)" << "  |  " << "online(ms)" << Log::endl;
+			std::cout << "setSize" << "       |  " << "offline(ms)" << "  |  " << "online(ms)" << std::endl;
 
 			for (u64 j = 0; j < numTrial; ++j)
 			{
 				PRNG prngSame(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
 				PRNG prngDiff(_mm_set_epi32(434653, 23, 11, 56));
 
-				std::vector<block> recvSet(sendSize);
-				u64 rand = prngSame.get_u32() % sendSize;
+				std::vector<block> recvSet(recverSize);
+				u64 rand = prngSame.get_u32() % std::min(sendSize, recverSize);
 				for (u64 i = 0; i < rand; ++i)
 				{
 					recvSet[i] = prngSame.get_block();
 				}
 
-				for (u64 i = rand; i < sendSize; ++i)
+				for (u64 i = rand; i < recverSize; ++i)
 				{
 					recvSet[i] = prngDiff.get_block();
 				}
@@ -289,15 +289,15 @@ void BopRecv()
 				offlineTimeTot += offlineTime;
 				onlineTimeTot += online;
 				//output
-				//Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
-				//Log::out << "#Expected Intersection: " << rand << Log::endl;
-				Log::out << sendSize << "\t\t" << offlineTime << "\t\t" << online << Log::endl;
+				//std::cout << "#Output Intersection: " << recvPSIs.mIntersection.size() << std::endl;
+				//std::cout << "#Expected Intersection: " << rand << std::endl;
+				std::cout << recverSize << " vs " << sendSize << "\t\t" << offlineTime << "\t\t" << online << std::endl;
 
 			}
-			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
-			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
-			Log::out << "2^" << recvPow << " vs 2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
-			Log::out << "--------------------------\n";
+			std::cout << recverSize << " vs 2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
+			std::cout << recverSize << " vs 2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
+			std::cout << recverSize << " vs 2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
+			std::cout << "--------------------------\n";
 
 			total << "2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
 			total << "2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
@@ -322,7 +322,7 @@ void BopRecv()
 
 void BopTest()
 {
-	Log::out << "Test()" << Log::endl;
+	std::cout << "Test()" << std::endl;
 
 	u64 numThreads = 1;
 	u64 senderSize = (1 << 8), psiSecParam = 40;// , numThreads(1);
@@ -398,22 +398,22 @@ void BopTest()
 
 
 	auto totalTime = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-	Log::out << gTimer << Log::endl;
+	std::cout << gTimer << std::endl;
 
-	Log::out << "Total Time: " << totalTime << "(ms)\t\t\n" << Log::endl;
+	std::cout << "Total Time: " << totalTime << "(ms)\t\t\n" << std::endl;
 
 	//output
-	Log::out << "#Output Intersection: " << recvPSIs.mIntersection.size() << Log::endl;
-	Log::out << "#Expected Intersection: " << rand << Log::endl;
+	std::cout << "#Output Intersection: " << recvPSIs.mIntersection.size() << std::endl;
+	std::cout << "#Expected Intersection: " << rand << std::endl;
 
 	if (recvPSIs.mIntersection.size() != rand)
 	{
-		Log::out << "\nbad intersection,  expecting full set of size  " << senderSize << " but got " << recvPSIs.mIntersection.size() << Log::endl;
+		std::cout << "\nbad intersection,  expecting full set of size  " << senderSize << " but got " << recvPSIs.mIntersection.size() << std::endl;
 		//throw std::runtime_error(std::string("bad intersection, "));
 	}
 	else
 	{
-		Log::out << "\nCool. Good PSI!" << Log::endl;
+		std::cout << "\nCool. Good PSI!" << std::endl;
 	}
 
 	thrd.join();
@@ -433,11 +433,11 @@ void BopTest()
 
 void usage(const char* argv0)
 {
-	Log::out << "Error! Please use:" << Log::endl;
-	Log::out << "\t 1. For unit test: " << argv0 << " -t" << Log::endl;
-	Log::out << "\t 2. For simulation (2 terminal): " << Log::endl;;
-	Log::out << "\t\t Sender terminal: " << argv0 << " -r 0" << Log::endl;
-	Log::out << "\t\t Receiver terminal: " << argv0 << " -r 1" << Log::endl;
+	std::cout << "Error! Please use:" << std::endl;
+	std::cout << "\t 1. For unit test: " << argv0 << " -t" << std::endl;
+	std::cout << "\t 2. For simulation (2 terminal): " << std::endl;;
+	std::cout << "\t\t Sender terminal: " << argv0 << " -r 0" << std::endl;
+	std::cout << "\t\t Receiver terminal: " << argv0 << " -r 1" << std::endl;
 }
 
 int main(int argc, char** argv)

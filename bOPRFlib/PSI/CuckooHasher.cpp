@@ -53,7 +53,7 @@ namespace bOPRF
 		mSimpleSize = simpleSize;
 		mBinCount = 1.2*cuckooSize;
 		mMaxStashSize = get_stash_size(cuckooSize);
-		mSendersMaxBinSize = get_bin_size(cuckooSize, simpleSize);
+		mSendersMaxBinSize = get_bin_size(mBinCount, simpleSize * 3, 40);
 		mBins.resize(mBinCount);
 	}
 

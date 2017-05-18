@@ -2,6 +2,8 @@
 #include "Crypto/Commit.h"
 #include "Common/BitVector.h"
 //#include "Common/Timer.h"
+#include <boost/math/special_functions/binomial.hpp>
+#include <boost/multiprecision/cpp_bin_float.hpp>
 
 namespace bOPRF {
 
@@ -141,27 +143,117 @@ namespace bOPRF {
 		throw std::runtime_error("get_stash_size: rt error at " LOCATION);
 
 	}
-	u64 get_bin_size(u64 cuckooSize, u64 simpleSize) {
-		if (simpleSize <= cuckooSize)
-		{
 
-			if (simpleSize >= (1 << 24))
-				return 28;
-			if (simpleSize >= (1 << 20))
-				return 27;
-			if (simpleSize >= (1 << 16))
-				return 26;
-			if (simpleSize >= (1 << 12))
-				return 25;
-			if (simpleSize >= (1 << 8))
-				return 24;
+	//template<unsigned int N = 16>
+	double getBinOverflowProb(u64 numBins, u64 numBalls, u64 binSize, double epsilon = 0.0001)
+	{
+		if (numBalls <= binSize)
+			return std::numeric_limits<double>::max();
 
-			return 30;  //other
-		}
-		else
+		if (numBalls > unsigned(-1))
 		{
-			return simpleSize / cuckooSize + 16 + 4 * std::sqrt(simpleSize * std::log2(cuckooSize) / cuckooSize);
+			auto msg = ("boost::math::binomial_coefficient(...) only supports " + std::to_string(sizeof(unsigned) * 8) + " bit inputs which was exceeded." LOCATION);
+			std::cout << msg << std::endl;
+			throw std::runtime_error(msg);
 		}
+
+		//try 
+		//{
+
+			//std::cout << numBalls << " " << numBins << " " << binSize << std::endl;
+		typedef boost::multiprecision::number<boost::multiprecision::backends::cpp_bin_float<16>> T;
+		T sum = 0.0;
+		T sec = 0.0;// minSec + 1;
+		T diff = 1;
+		u64 i = binSize + 1;
+
+
+		while (diff > T(epsilon) && numBalls >= i /*&& sec > minSec*/)
+		{
+			sum += numBins * boost::math::binomial_coefficient<T>(numBalls, i)
+				* boost::multiprecision::pow(T(1.0) / numBins, i) * boost::multiprecision::pow(1 - T(1.0) / numBins, numBalls - i);
+
+			//std::cout << "sum[" << i << "] " << sum << std::endl;
+
+			T sec2 = boost::multiprecision::log2(sum);
+			diff = boost::multiprecision::abs(sec - sec2);
+			//std::cout << diff << std::endl;
+			sec = sec2;
+
+			i++;
+		}
+
+		return std::max<double>(0, (double)-sec);
+		//}
+		//catch (std::exception& e)
+		//{
+		//	if (N == 16)
+		//	{
+		//		std::cout << "percision failure at " << LOCATION << "\n tring again with high percision (performance penalty)" << std::endl;
+		//		// try again with higher percition
+		//		return getBinOverflowProb<128>(numBins, numBalls, binSize);
+		//	}
+		//		
+		//	std::cout << "retry percision failure at " << LOCATION << "\n" << e.what() << std::endl;
+		//	throw;
+		//}
+	}
+
+	u64 get_bin_size(u64 numBins, u64 numBalls, u64 statSecParam)
+	{
+
+		auto B = std::max<u64>(1, numBalls / numBins);
+
+		double currentProb = 0;
+		u64 step = 1;
+
+		bool doubling = true;
+
+		while (currentProb < statSecParam || step > 1)
+		{
+			if (!step)
+				throw std::runtime_error(LOCATION);
+
+
+			if (statSecParam > currentProb)
+			{
+				if (doubling) step = std::max<u64>(1, step * 2);
+				else          step = std::max<u64>(1, step / 2);
+
+				B += step;
+			}
+			else
+			{
+				doubling = false;
+				step = std::max<u64>(1, step / 2);
+				B -= step;
+			}
+			currentProb = getBinOverflowProb(numBins, numBalls, B);
+		}
+
+
+
+		return B;
+		//if (simpleSize <= cuckooSize)
+		//{
+
+		//	if (simpleSize >= (1 << 24))
+		//		return 28;
+		//	if (simpleSize >= (1 << 20))
+		//		return 27;
+		//	if (simpleSize >= (1 << 16))
+		//		return 26;
+		//	if (simpleSize >= (1 << 12))
+		//		return 25;
+		//	if (simpleSize >= (1 << 8))
+		//		return 24;
+
+		//	//return 30;  //other
+		//}
+		//else 
+		//{
+		//	return simpleSize / cuckooSize + 16 + 4 * std::sqrt(simpleSize * std::log2(cuckooSize) / cuckooSize);
+		//}
 
 		//throw std::runtime_error("get_bin_size: rt error at " LOCATION);
 	}

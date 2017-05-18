@@ -47,12 +47,14 @@ namespace bOPRF
 		Log::out << Log::unlock;
 	}
 
-	void SimpleHasher::init(u64 cuckooSize, u64 simpleSize)
+	void SimpleHasher::init(u64 cuckooSize, u64 simpleSize, u64 statSecParam, u64 numHashFunction)
 	{		
+		if (numHashFunction != 3) throw std::runtime_error(LOCATION);
+
 		mSimpleSize = simpleSize;
 		mCuckooSize = cuckooSize;
 		mBinCount = 1.2*cuckooSize;
-		mMaxBinSize = get_bin_size(cuckooSize, simpleSize);
+		mMaxBinSize = get_bin_size(mBinCount, simpleSize * numHashFunction, statSecParam);
 		mBins.resize(mBinCount, mMaxBinSize);
 		mBinSizes.resize(mBinCount, 0);
 	}

@@ -39,7 +39,7 @@ namespace bOPRF
 		void print() const;
 
 	
-		void init(u64 cuckooSize, u64 simpleSize); 
+		void init(u64 cuckooSize, u64 simpleSize, u64 statSecParam = 40, u64 numHashFunction = 3);
 		u64 insertItems(std::array<std::vector<block>,4> hashs);
 
 	};

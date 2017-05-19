@@ -80,7 +80,7 @@ namespace bOPRF
 		auto& chl = *chls[0];
 		SHA1 sha1;
 		u8 hashBuff[SHA1::HashSize];
-		u64 maskSize = get_mask_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
+		u64 maskSize = get_mask_size(mSenderSize, mRecverSize); //by byte
 		u64 codeWordSize = get_codeword_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
 
 		//compute PRC

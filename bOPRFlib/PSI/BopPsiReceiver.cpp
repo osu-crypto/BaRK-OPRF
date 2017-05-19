@@ -137,7 +137,7 @@ namespace bOPRF
 		PRNG prng(_mm_set_epi32(42534612345, 34557734565, 211234435, 23987045));
 
 		u64 codeWordSize = get_codeword_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
-		u64 maskSize = get_mask_size(std::max<u64>(mSenderSize, mRecverSize)); //by byte
+		u64 maskSize = get_mask_size(mSenderSize, mRecverSize); //by byte
 		blockBop codeWord;
 
 		//hash all items, use for: 1) arrage each item to bin using Cuckoo; 

@@ -274,7 +274,7 @@ namespace bOPRF {
 
 		//throw std::runtime_error("get_codeword_size: rt error at " LOCATION);
 	}
-	u64 get_mask_size(u64 neles, u64 othersize, u64 statSecParam = 40) {
+	u64 get_mask_size(u64 neles, u64 othersize, u64 statSecParam) {
 
 
 		return (statSecParam + log2(neles * othersize) + 7 ) / 8;

@@ -180,7 +180,7 @@ struct blockBop
 	u64 get_stash_size(u64); //the maximum size of the stash for Cuckoo hashing.
 	u64 get_bin_size(u64 binCount, u64 numItems, u64 statSecParam); //the maximum size of a bin, when Alice hashes 3n items 	into 3 · 1.2n bins using plain hashing.
 	u64 get_codeword_size(u64); //length of the psuedorandom code (and hence the width of the OT extension matrix) in our Bop protocol.
-	u64 get_mask_size(u64); //length of the Bop output messages.
+	u64 get_mask_size(u64,u64, u64 statsecparam = 40); //length of the Bop output messages.
 }
 
 inline bool eq(const bOPRF::block& lhs, const bOPRF::block& rhs)

@@ -201,7 +201,9 @@ namespace bOPRF {
 
 	u64 BtChannel::getTotalDataSent() const
 	{
-		return (mSocket) ? (u64)mSocket->mTotalSentData : 0;
+		auto ret = (mSocket) ? (u64)mSocket->mTotalSentData : 0;
+		mSocket->mTotalSentData = 0;
+		return ret;
 	}
 
 	u64 BtChannel::getMaxOutstandingSendData() const

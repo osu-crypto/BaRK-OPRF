@@ -190,6 +190,7 @@ void BopSender()
 
 				sendPSIs.sendInput(sendSet, sendChls);
 				//std::cout << "threads =  " << numThreads << std::endl << gTimer << std::endl << std::endl << std::endl;
+				std::cout << "sent " << sendChls[0]->getTotalDataSent() << std::endl;;
 
 				u64 otIdx = 0;
 			}
@@ -288,6 +289,9 @@ void BopRecv()
 				auto online = std::chrono::duration_cast<std::chrono::milliseconds>(end - mid).count();
 				offlineTimeTot += offlineTime;
 				onlineTimeTot += online;
+
+				std::cout << "sent " << recvChls[0]->getTotalDataSent() << std::endl;;
+
 				//output
 				//std::cout << "#Output Intersection: " << recvPSIs.mIntersection.size() << std::endl;
 				//std::cout << "#Expected Intersection: " << rand << std::endl;
@@ -443,14 +447,14 @@ void usage(const char* argv0)
 int main(int argc, char** argv)
 {
 
-	//for (auto p : { 12, 16, 20, 24, 28 })
-	//{
-	//	Timer t;
-	//	auto s = t.setTimePoint("");
-	//	auto B = get_bin_size(1 << 13, 3 *( u64(1) << p), 40);
-	//	auto e = t.setTimePoint("");
-	//	std::cout << 1 << 13 << " p " << p << "   B " << B << " "<< std::chrono::duration_cast<std::chrono::milliseconds>(e-s).count() << std::endl;
-	//}
+	for (auto p : { 12, 16, 20, 24, 28 })
+	{
+		Timer t;
+		auto s = t.setTimePoint("");
+		auto B = get_bin_size(1 << 13, 3 *( u64(1) << p), 40);
+		auto e = t.setTimePoint("");
+		std::cout << 1 << 13 << " p " << p << "   B " << B << " "<< std::chrono::duration_cast<std::chrono::milliseconds>(e-s).count() << std::endl;
+	}
 
 	if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 't') {
 		BopTest();

@@ -19,11 +19,11 @@ After cloning project from git,
 3. run bOPRFmain project
  
 ##### Linux:
-1. make
+1. make (WARNING: makefile fails, we will fix it soon)
 2. for test:
 	./Release/bOPRFmain.exe -t
 
-**WARNING:** makefile fails, we will fix the bug soon.	
+
 ## Test
 
 Our database is generated randomly. We have 2 functions: 

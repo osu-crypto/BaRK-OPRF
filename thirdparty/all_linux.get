@@ -3,6 +3,11 @@ sudo yum install unzip -Y
 sudo yum install gcc-c++ -Y
 sudo yum install m4 -Y
 
+sudo apt-get install bzip2 -Y
+sudo apt-get install unzip -Y
+sudo apt-get install gcc-c++ -Y
+sudo apt-get install gcc-c++ -Y
+
 cd linux
 
 bash boost.get &

@@ -8,7 +8,8 @@ Evaluating on a single server (`2 36-cores Intel Xeon CPU E5-2699 v3 @ 2.30GHz a
 ### Required libraries
  C++ compiler with C++11 support. There are several library dependencies including [`Boost`](https://sourceforge.net/projects/boost/), [`Crypto++`](http://www.cryptopp.com/), [`Miracl`](https://github.com/miracl/MIRACL), and [`Mpir`](http://mpir.org/). Our code has been tested on both Windows (Microsoft Visual Studio) and Linux. To install the required libraries: 
   * windows: open PowerShell,  `cd ./thirdparty`, and `.\all_win.ps1` 
-  * linux: `cd ./thirdparty`, and `bash .\all_linux.get` 
+  * linux: `cd ./thirdparty`, and `bash .\all_linux.get`.
+  
   
 ### Building the Project
 After cloning project from git,
@@ -21,7 +22,8 @@ After cloning project from git,
 1. make
 2. for test:
 	./Release/bOPRFmain.exe -t
-	
+
+**WARNING:** makefile fails, we will fix the bug soon.	
 ## Test
 
 Our database is generated randomly. We have 2 functions: 
@@ -43,7 +45,7 @@ On the Receiver's terminal, run:
 ## Acknowledgements
 Our code utilizes some parts of: 
 * [`cryptoTools`](https://github.com/ladnir/cryptoTools) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. 
-* [`ENCRYPTO_utils`](https://github.com/encryptogroup/ENCRYPTO_utils) provided by [Michael Zohner](https://sites.google.com/site/mizohner/).  We also thank Michael Zohner for answering our many questions about the implementation of [PSSZ15](https://eprint.iacr.org/2015/634).
+* [`ENCRYPTO_utils`](https://github.com/encryptogroup/ENCRYPTO_utils) provided by [Michael Zohner](https://sites.google.com/site/mizohner/).
 
 For computing 2-party PSI with **NO** stash bins, we refer to efficient  [`libPSI`](https://github.com/osu-crypto/libPSI).
 

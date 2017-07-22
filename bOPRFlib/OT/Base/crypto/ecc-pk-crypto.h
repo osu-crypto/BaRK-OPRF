@@ -10,9 +10,10 @@
 
 #include "pk-crypto.h"
 #include <sstream>
-#include "miracl/include/ecn.h"
-#include "miracl/include/big.h"
-#include "miracl/include/ec2.h"
+#include "miracl/miracl_osmt/include/big.h"
+#include "miracl_osmt/include/big.h"
+#include "miracl_osmt/include/ecn.h"
+#include "miracl_osmt/include/ec2.h"
 
 
 #define fe2ec2(fieldele) (((ecc_fe*) (fieldele))->get_val())
@@ -147,4 +148,4 @@ private:
 void point_to_byte(uint8_t* pBufIdx, uint32_t field_size_bytes, EC2* to_export);
 void byte_to_point(EC2* to_export, uint32_t field_size_bytes, uint8_t* pBufIdx);
 
-#endif /* ECC_PK_CRYPTO_H_ */
+#endif

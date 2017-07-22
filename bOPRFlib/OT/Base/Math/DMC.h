@@ -3,8 +3,8 @@
  * elliptic curves from the PVW paper
  */
 
-#include "miracl/include/ecn.h"
-#include "miracl/include/big.h"
+#include "miracl_osmt/include/ecn.h"
+#include "miracl_osmt/include/big.h"
 
 namespace bOPRF {
 

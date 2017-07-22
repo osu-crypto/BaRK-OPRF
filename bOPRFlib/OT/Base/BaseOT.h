@@ -4,7 +4,7 @@
 #include "Common/BitVector.h"
 #include "typedefs.h"
 #include <ctime>
-#include "miracl/include/big.h"
+#include "miracl_osmt/include/big.h"
 
 #include <iostream>
 #include <cstring>

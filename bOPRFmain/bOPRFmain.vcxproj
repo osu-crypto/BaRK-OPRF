@@ -48,12 +48,12 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/../bOPRFlib/;$(SolutionDir)thirdparty/win/boost;C:/libs/boost;$(SolutionDir)thirdparty/win/;C:/libs/;$(SolutionDir)thirdparty/win/miracl;C:/libs/miracl/miracl_osmt;C:/libs/mpir</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);$(ProjectDir)/../bOPRFlib/;$(SolutionDir)thirdparty/win/;$(SolutionDir)thirdparty/win/miracl;$(SolutionDir)thirdparty/win/miracl/miracl_osmt;$(SolutionDir)thirdparty/win/mpir;$(SolutionDir)thirdparty/win/boost</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories);$(SolutionDir)\thirdparty\win\boost\stage\lib;C:\libs/boost\stage\lib;$(OutDir);$(SolutionDir)thirdparty\win\;C:/libs/</AdditionalLibraryDirectories>
-      <AdditionalDependencies>bOPRFlib.lib;mpir\lib\x64\$(Configuration)\mpir.lib;mpir\lib\x64\$(Configuration)\mpirxx.lib;Miracl\x64\$(Configuration)\miracl_osmt.lib;cryptopp\x64\Output\$(Configuration)\cryptlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(VCInstallDir)UnitTest\lib;%(AdditionalLibraryDirectories);$(SolutionDir)\thirdparty\win\boost\stage\lib;$(OutDir);$(SolutionDir)thirdparty\win\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>bOPRFlib.lib;mpir\lib\x64\$(Configuration)\mpir.lib;mpir\lib\x64\$(Configuration)\mpirxx.lib;Miracl\x64\$(Configuration)\miracl_osmt.lib;Miracl\x64\$(Configuration)\miracl.lib;cryptopp\x64\Output\$(Configuration)\cryptlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

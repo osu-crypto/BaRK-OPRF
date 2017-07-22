@@ -1,25 +1,19 @@
 # Batched Oblivious PRF
-This is the implementation of our CCS 2016 paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://eprint.iacr.org/2016/799)]. Our code utilizes some parts of the [`libPSI`] (https://github.com/osu-crypto/libPSI) framework (OT extension) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. For any questions related to the implementation, please contact Ni Trieu at trieun at oregonstate dot edu
+This is the implementation of our [CCS 2016](http://dl.acm.org/citation.cfm?id=2978381)  paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://eprint.iacr.org/2016/799)]. 
 
-## Abstract
----
-We describe a lightweight protocol for oblivious evaluation of a pseudorandom function (OPRF) in the presence of semi-honest adversaries. In an OPRF protocol a receiver has an input $r$; the sender gets output $s$ and the receiver gets output $F(s,r)$, where $F$ is a pseudorandom function and $s$ is a random seed. Our protocol uses a novel adaptation of 1-out-of-2 OT-extension protocols, and is particularly efficient when used to generate a large batch of OPRF instances. The cost to realize $m$ OPRF instances is roughly the cost to realize $3.5 m$ instances of standard 1-out-of-2 OTs (using state-of-the-art OT extension).
-
-We explore in detail our protocol's application to semi-honest secure private set intersection (PSI). The fastest state-of-the-art PSI protocol (Pinkas et al., Usenix 2015) is based on efficient OT extension. We observe that our OPRF can be used to remove their PSI protocol's dependence on the bit-length of the parties' items. We implemented both PSI protocol variants and found ours to be 3.0--3.2x faster than Pinkas et al.\ for PSI of 128-bit strings and sufficiently large sets. Concretely, ours requires only 4.6 seconds to securely compute the intersection of $2^{20}$-size sets, regardless of the bitlength of the items. For very large sets, our protocol is only 5.2x slower than the {\em insecure} naive hashing approach for PSI.
+Evaluating on a single Intel Xeon server (`2 36-cores Intel Xeon CPU E5-2699 v3 @ 2.30GHz and 256GB of RAM`) with a single thread per party, ours protocol requires only `3.8` seconds to securely compute the intersection of `2^20`-size sets, regardless of the bit length of the items.
 
 ## Installations
----
-###Required libraries
-  * [`Boost`](https://sourceforge.net/projects/boost/)
-  * [`Crypto++`](http://www.cryptopp.com/)
-  * [`Miracl`](https://github.com/miracl/MIRACL)
-  * [`Mpir`](http://mpir.org/)
+
+### Required libraries
+ C++ compiler with C++11 support. There are several library dependencies including [`Boost`](https://sourceforge.net/projects/boost/), [`Crypto++`](http://www.cryptopp.com/), [`Miracl`](https://github.com/miracl/MIRACL), and [`Mpir`](http://mpir.org/). Our code has been tested on both Windows (Microsoft Visual Studio) and Linux. To install the required libraries: 
+  * windows: open PowerShell,  `cd ./thirdparty`, and `.\all_win.ps1` 
+  * linux: `cd ./thirdparty`, and `bash .\all_linux.get` 
   
-Please read [`libPSI`](https://github.com/osu-crypto/libPSI) for more detail about how to install the required libraries
 ### Building the Project
 After cloning project from git,
 ##### Windows:
-1. build pOPRFlib project
+1. build bOPRFlib project
 2. add argument for bOPRFmain project (for example: -t)
 3. run bOPRFmain project
  
@@ -28,7 +22,8 @@ After cloning project from git,
 2. for test:
 	./Release/bOPRFmain.exe -t
 	
-### Test
+## Test
+
 Our database is generated randomly. We have 2 functions: 
 #### 1. Unit Test: 
 test PSI result for a small number of inputs (2^12), shows whether the program computes a right PSI. This test runs on one terminal:
@@ -44,3 +39,14 @@ On the Sender's terminal, run:
 On the Receiver's terminal, run:
 	
 	./bOPRFmain.exe -r 1
+	
+## Acknowledgements
+Our code utilizes some parts of: 
+* [`cryptoTools`](https://github.com/ladnir/cryptoTools) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. 
+* [`ENCRYPTO_utils`](https://github.com/encryptogroup/ENCRYPTO_utils) provided by [Michael Zohner](https://sites.google.com/site/mizohner/).  We also thank Michael Zohner for answering our many questions about the implementation of [PSSZ15](https://eprint.iacr.org/2015/634).
+
+For computing 2-party PSI with **NO** stash bins, we refer to efficient  [`libPSI`](https://github.com/osu-crypto/libPSI).
+
+## Help
+For any questions on building or running the library, please contact [`Ni Trieu`](nitrieu.github.io) at trieun at oregonstate dot edu
+

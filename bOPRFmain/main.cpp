@@ -329,8 +329,8 @@ void BopTest()
 	std::cout << "Test()" << std::endl;
 
 	u64 numThreads = 1;
-	u64 senderSize = (1 << 8), psiSecParam = 40;// , numThreads(1);
-	u64 recverSize = (1 << 16);// , numThreads(1);
+	u64 senderSize = (1 << 12), psiSecParam = 40;// , numThreads(1);
+	u64 recverSize = (1 << 12);// , numThreads(1);
 
 	//generate data
 	PRNG prng(_mm_set_epi32(4253465, 3434565, 234435, 23987045));
@@ -446,15 +446,17 @@ void usage(const char* argv0)
 
 int main(int argc, char** argv)
 {
+	BopTest();
+	return 0;
 
-	for (auto p : { 12, 16, 20, 24, 28 })
-	{
-		Timer t;
-		auto s = t.setTimePoint("");
-		auto B = get_bin_size(1 << 13, 3 *( u64(1) << p), 40);
-		auto e = t.setTimePoint("");
-		std::cout << 1 << 13 << " p " << p << "   B " << B << " "<< std::chrono::duration_cast<std::chrono::milliseconds>(e-s).count() << std::endl;
-	}
+	//for (auto p : { 12, 16, 20, 24, 28 })
+	//{
+	//	Timer t;
+	//	auto s = t.setTimePoint("");
+	//	auto B = get_bin_size(1 << 13, 3 *( u64(1) << p), 40);
+	//	auto e = t.setTimePoint("");
+	//	std::cout << 1 << 13 << " p " << p << "   B " << B << " "<< std::chrono::duration_cast<std::chrono::milliseconds>(e-s).count() << std::endl;
+	//}
 
 	if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 't') {
 		BopTest();

@@ -19,7 +19,7 @@ After cloning project from git,
 3. run bOPRFmain project
  
 ##### Linux:
-1. make (WARNING: makefile fails, we will fix it soon)
+1. make
 2. for test:
 	./Release/bOPRFmain.exe -t
 

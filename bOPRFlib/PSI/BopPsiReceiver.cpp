@@ -322,8 +322,8 @@ namespace bOPRF
 
 				myOt[i] =
 					codeWord
-					^ mSSOtMessages[i][0]
-					^ mSSOtMessages[i][1];
+					^ mSSOtMessages[otIdx][0]
+					^ mSSOtMessages[otIdx][1];
 
 				sha1.Reset();
 				sha1.Update((u8*)&mSSOtMessages[otIdx][0], codeWordSize);

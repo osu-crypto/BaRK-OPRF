@@ -242,7 +242,7 @@ namespace bOPRF
 				codeWord.elem[2] = aesHashBuffs[2][i];
 				codeWord.elem[3] = aesHashBuffs[3][i];
 
-				codeWord = mPsiRecvSSOtMessages[stashIdx] ^ ((theirStashCorrOT[stashIdx] ^ codeWord) & blk448Choice);
+				codeWord = mPsiRecvSSOtMessages[otIdx] ^ ((theirStashCorrOT[stashIdx] ^ codeWord) & blk448Choice);
 
 
 				sha1.Reset();

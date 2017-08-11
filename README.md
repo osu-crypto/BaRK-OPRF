@@ -50,5 +50,5 @@ Our code utilizes some parts of:
 For computing 2-party PSI with **NO** stash bins, we refer to efficient  [`libPSI`](https://github.com/osu-crypto/libPSI).
 
 ## Help
-For any questions on building or running the library, please contact [`Ni Trieu`](nitrieu.github.io) at trieun at oregonstate dot edu
+For any questions on building or running the library, please contact [`Ni Trieu`](http://people.oregonstate.edu/~trieun/) at trieun at oregonstate dot edu
 

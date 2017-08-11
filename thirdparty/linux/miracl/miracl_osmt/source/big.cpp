@@ -114,7 +114,7 @@ Big lxor(const Big& x,const Big& y)
 
 Big from_binary(int len,char *ptr)
 {Big z; bytes_to_big(len,ptr,z.fn); return z;}
-int to_binary(const Big& b,int max,char *ptr,BOOL justify)
+int to_binary(const Big& b,int max,char *ptr,BOOL justify=FALSE)
 { return big_to_bytes(max,b.fn,ptr,justify);}
 
 Big modmult(const Big& b1,const Big& b2,const Big& m)
@@ -174,7 +174,7 @@ Big pow(int n,Big *a,Big *b,Big p)
 
 #endif
 
-Big luc(const Big& b1,const Big& b2,const Big& b3,Big *b4)
+Big luc(const Big& b1,const Big& b2,const Big& b3,Big *b4=NULL)
 {Big z; if (b4!=NULL) lucas(b1.fn,b2.fn,b3.fn,b4->fn,z.fn); 
         else          lucas(b1.fn,b2.fn,b3.fn,z.fn,z.fn);
 return z;}
@@ -328,7 +328,7 @@ istream& operator>>(istream& s, Big& x)
 
 // Note new parameter of window_size. Default to 5, but reduce to 4 (or even 3) to save RAM
 
-int window(const Big& x,int i,int *nbs,int *nzs,int window_size)
+int window(const Big& x,int i,int *nbs,int *nzs,int window_size=5)
 { /* returns sliding window value, max. of 5 bits,         *
    * starting at i-th bit of big x. nbs is number of bits  *
    * processed, nzs is the number of additional trailing   *
@@ -340,7 +340,7 @@ int window(const Big& x,int i,int *nbs,int *nzs,int window_size)
     return mr_window(x.fn,i,nbs,nzs,window_size);
 }
 
-int naf_window(const Big& x,const Big& x3,int i,int *nbs,int *nzs,int store)
+int naf_window(const Big& x,const Big& x3,int i,int *nbs,int *nzs,int store=11)
 { /* returns sliding window value, max of 5 bits           *
    * starting at i-th bit of x. nbs is number of bits      *
    * processed. nzs is number of additional trailing       *    

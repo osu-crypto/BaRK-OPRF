@@ -3,6 +3,7 @@
  *   For C++ build of library
  */
 
+#define MR_UNIX_MT
 #define MR_LITTLE_ENDIAN
 #define MIRACL 64
 #define mr_utype long

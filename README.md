@@ -33,7 +33,7 @@ test PSI result for a small number of inputs (2^12), shows whether the program c
 	./bOPRFmain.exe -t
 	
 #### 2. Simulation: 
-Using two terminals, compute PSI in 6 cases with the number of input (2^8, 2^12, 2^16, 2^18, 2^20, 2^24). For each case, we run the code 10 times to compute PSI. The outputs include the average online/offline/total runtime (displayed on the screen) and the output.txt file. Note that these parameters can be customized in the code.
+Using two terminals, compute PSI in 6 cases with the number of input (2^8, 2^12, 2^16, 2^20, 2^24). For each case, we run the code 10 times to compute PSI. The outputs include the average online/offline/total runtime (displayed on the screen) and the output.txt file. Note that these parameters can be customized in the code.
 On the Sender's terminal, run:
 
 	./bOPRFmain.exe -r 0

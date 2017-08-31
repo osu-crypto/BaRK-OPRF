@@ -137,18 +137,15 @@ void BopSender()
 	for (u64 i = 0; i < numThreads; ++i)
 		sendChls[i] = &ep0.addChannel(name + std::to_string(i), name + std::to_string(i));
 
-	senderGetLatency(*sendChls[0]);
+	//senderGetLatency(*sendChls[0]);
 
-	pingTest(*sendChls[0], true);
+	//pingTest(*sendChls[0], true);
 
 
-	for (u64 pow : { 16,20,24 })
+		for (u64 pow : { 8, 12, 16, 20, 24})
 	{
-
-		for (u64 recverSize : { 5535, 11041 })
-		{
-			u64 senderSize = (1 << pow), psiSecParam = 40;
-			recverSize = recverSize ? recverSize : senderSize;
+		u64 senderSize = (1 << pow), psiSecParam = 40;
+		u64 recverSize = senderSize; //for psi of diffirent set size, you can set receiver'set size here 
 
 			u64 offlineTimeTot(0);
 			u64 onlineTimeTot(0);
@@ -190,11 +187,10 @@ void BopSender()
 
 				sendPSIs.sendInput(sendSet, sendChls);
 				//std::cout << "threads =  " << numThreads << std::endl << gTimer << std::endl << std::endl << std::endl;
-				std::cout << "sent " << sendChls[0]->getTotalDataSent() << std::endl;;
+				//std::cout << "sent " << sendChls[0]->getTotalDataSent() << std::endl;;
 
 				u64 otIdx = 0;
 			}
-		}
 	}
 
 	for (u64 i = 0; i < numThreads; ++i)
@@ -230,25 +226,22 @@ void BopRecv()
 	for (u64 i = 0; i < numThreads; ++i)
 		recvChls[i] = &ep1.addChannel(name + std::to_string(i), name + std::to_string(i));
 
-	recverGetLatency(*recvChls[0]);
-	pingTest(*recvChls[0], false);
+	//recverGetLatency(*recvChls[0]);
+	//pingTest(*recvChls[0], false);
 	std::cout << "role  = recv (" << numThreads << ") SSOtPSI" << std::endl;
 	//8,12,16,
 	std::cout << "--------------------------\n";
 
 
-	for (u64 pow : { 16,20,24 })
+	for (u64 pow : { 8,12,16,20,24 })
 	{
-		for (u64 recverSize : {  5535, 11041 })
-		{
-			u64 sendSize = (1 << pow), psiSecParam = 40;
-			recverSize = recverSize ? recverSize : sendSize;
-
+		u64 senderSize = (1 << pow), psiSecParam = 40;
+		u64 recverSize = senderSize; //for psi of diffirent set size, you can set receiver'set size here 
 
 			u64 offlineTimeTot(0);
 			u64 onlineTimeTot(0);
 
-			std::cout << "setSize" << "       |  " << "offline(ms)" << "  |  " << "online(ms)" << std::endl;
+			std::cout << "setSize" << "\t\t\t\t|  " << "offline(ms)" << "  |  " << "online(ms)" << std::endl;
 
 			for (u64 j = 0; j < numTrial; ++j)
 			{
@@ -256,7 +249,7 @@ void BopRecv()
 				PRNG prngDiff(_mm_set_epi32(434653, 23, 11, 56));
 
 				std::vector<block> recvSet(recverSize);
-				u64 rand = prngSame.get_u32() % std::min(sendSize, recverSize);
+				u64 rand = prngSame.get_u32() % std::min(senderSize, recverSize);
 				for (u64 i = 0; i < rand; ++i)
 				{
 					recvSet[i] = prngSame.get_block();
@@ -279,7 +272,7 @@ void BopRecv()
 				Timer timer;
 				timer.setTimePoint("start");
 				auto start = timer.setTimePoint("start");
-				recvPSIs.init(sendSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
+				recvPSIs.init(senderSize, recverSize, psiSecParam, recvChls, OTRecver0, ZeroBlock);
 				auto mid = timer.setTimePoint("init");
 				recvPSIs.sendInput(recvSet, recvChls);
 				//timer.setTimePoint("Done");
@@ -290,25 +283,30 @@ void BopRecv()
 				offlineTimeTot += offlineTime;
 				onlineTimeTot += online;
 
-				std::cout << "sent " << recvChls[0]->getTotalDataSent() << std::endl;;
+				//std::cout << "sent " << recvChls[0]->getTotalDataSent() << std::endl;;
 
 				//output
 				//std::cout << "#Output Intersection: " << recvPSIs.mIntersection.size() << std::endl;
 				//std::cout << "#Expected Intersection: " << rand << std::endl;
-				std::cout << recverSize << " vs " << sendSize << "\t\t" << offlineTime << "\t\t" << online << std::endl;
+				if (recvPSIs.mIntersection.size() != rand)
+				{
+					std::cout << "\nbad intersection,  expecting  " << rand << " but got " << recvPSIs.mIntersection.size() << std::endl;
+					//throw std::runtime_error(std::string("bad intersection, "));
+				}
+
+				std::cout << recverSize << " vs " << senderSize << "\t\t\t\t" << offlineTime << "\t\t" << online << std::endl;
 
 			}
-			std::cout << recverSize << " vs 2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
-			std::cout << recverSize << " vs 2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
-			std::cout << recverSize << " vs 2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
+			std::cout << recverSize << " vs " << senderSize << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
+			std::cout << recverSize << " vs " << senderSize << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
+			std::cout << recverSize << " vs " << senderSize << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
 			std::cout << "--------------------------\n";
 
-			total << "2^" << pow << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
-			total << "2^" << pow << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
-			total << "2^" << pow << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
+			total << recverSize << " vs " << senderSize << "-- Online Avg Time: " << onlineTimeTot / numTrial << " ms " << "\n";
+			total << recverSize << " vs " << senderSize << "-- Offline Avg Time: " << offlineTimeTot / numTrial << " ms " << "\n";
+			total << recverSize << " vs " << senderSize << "-- Total Avg Time: " << (offlineTimeTot + onlineTimeTot) / numTrial << " ms " << "\n";
 			total << "--------------------------\n";
 
-		}
 
 	}
 
@@ -412,7 +410,7 @@ void BopTest()
 
 	if (recvPSIs.mIntersection.size() != rand)
 	{
-		std::cout << "\nbad intersection,  expecting full set of size  " << senderSize << " but got " << recvPSIs.mIntersection.size() << std::endl;
+		std::cout << "\nbad intersection,  expecting " << rand << " but got " << recvPSIs.mIntersection.size() << std::endl;
 		//throw std::runtime_error(std::string("bad intersection, "));
 	}
 	else
@@ -446,17 +444,14 @@ void usage(const char* argv0)
 
 int main(int argc, char** argv)
 {
-	BopTest();
-	return 0;
+	/*std::thread thrd([&]() {
+		BopSender();
+	});
+	BopRecv();
+	thrd.join();
+	return 0;*/
 
-	//for (auto p : { 12, 16, 20, 24, 28 })
-	//{
-	//	Timer t;
-	//	auto s = t.setTimePoint("");
-	//	auto B = get_bin_size(1 << 13, 3 *( u64(1) << p), 40);
-	//	auto e = t.setTimePoint("");
-	//	std::cout << 1 << 13 << " p " << p << "   B " << B << " "<< std::chrono::duration_cast<std::chrono::milliseconds>(e-s).count() << std::endl;
-	//}
+
 
 	if (argc == 2 && argv[1][0] == '-' && argv[1][1] == 't') {
 		BopTest();

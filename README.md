@@ -9,7 +9,11 @@ Evaluating on a single server (`2 36-cores Intel Xeon CPU E5-2699 v3 @ 2.30GHz a
  C++ compiler with C++11 support. There are several library dependencies including [`Boost`](https://sourceforge.net/projects/boost/), [`Crypto++`](http://www.cryptopp.com/), [`Miracl`](https://github.com/miracl/MIRACL), and [`Mpir`](http://mpir.org/). Our code has been tested on both Windows (Microsoft Visual Studio) and Linux. To install the required libraries: 
   * windows: open PowerShell,  `cd ./thirdparty`, and `.\all_win.ps1` 
   * linux: `cd ./thirdparty`, and `bash .\all_linux.get`.
-  
+ 
+ #### Some Compiling Issues & How to Fix (raised by users):
+1. Problem with compiling mpir: dowgrade sed to version 4.2.2-8 (for Debian Sid). Read more [`here`](https://github.com/wbhart/mpir/pull/184)
+2. Run this project with version>=6 of g++:  add static casts `(static_cast<int>(0x...))` to lines 27-34 in wake.cpp of crypto++
+3. Error with `_mm_cvtsi64_si128`: try on a 64 bit system
   
 ### Building the Project
 After cloning project from git,
@@ -22,11 +26,6 @@ After cloning project from git,
 1. make
 2. for test:
 	./Release/bOPRFmain.exe -t
-
-##### Some Compiling Issues & How to Fix (raised by users):
-1. Problem with compiling mpir: dowgrade sed to version 4.2.2-8 (for Debian Sid). Read more [`here`](https://github.com/wbhart/mpir/pull/184)
-2. Run this project with version>=6 of g++:  add static casts `(static_cast<int>(0x...))` to lines 27-34 in wake.cpp of crypto++
-3. Error with `_mm_cvtsi64_si128`: try on a 64 bit system
 
 ## Test
 

@@ -23,6 +23,10 @@ After cloning project from git,
 2. for test:
 	./Release/bOPRFmain.exe -t
 
+##### Some Compiling Issues & How to Fix (raised by users):
+1. Problem with compiling mpir: dowgrade sed to version 4.2.2-8 (for Debian Sid). Read more [`here`](https://github.com/wbhart/mpir/pull/184)
+2. Run this project with version>=6 of g++:  add static casts `(static_cast<int>(0x...))` to lines 27-34 in wake.cpp of crypto++
+3. Error with `_mm_cvtsi64_si128`: try on a 64 bit system
 
 ## Test
 
@@ -46,6 +50,8 @@ On the Receiver's terminal, run:
 Our code utilizes some parts of: 
 * [`cryptoTools`](https://github.com/ladnir/cryptoTools) provided by [Peter Rindal](http://web.engr.oregonstate.edu/~rindalp/). We would like to thank Peter Rindal for contributing libraries and helpful suggestions to our protocol implementation. 
 * [`ENCRYPTO_utils`](https://github.com/encryptogroup/ENCRYPTO_utils) provided by [Michael Zohner](https://sites.google.com/site/mizohner/).
+
+We would like to thank all the users for pointing out the compiling bugs that appear on different operation systems and supporting us to fix them
 
 For computing 2-party PSI with **NO** stash bins, we refer to efficient  [`libPSI`](https://github.com/osu-crypto/libPSI).
 

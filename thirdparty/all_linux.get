@@ -1,15 +1,15 @@
-sudo yum install bzip2 -Y
-sudo yum install unzip -Y
-sudo yum install gcc-c++ -Y
-sudo yum install m4 -Y
-sudo yum -y install  libboost-all-dev
+#sudo yum install bzip2 -Y
+#sudo yum install unzip -Y
+#sudo yum install gcc-c++ -Y
+#sudo yum install m4 -Y
+#sudo yum -y install  libboost-all-dev
 
-sudo apt-get install bzip2 
-sudo apt-get install unzip 
-sudo apt-get install gcc-c++ 
-sudo apt-get install gcc-c++ 
-sudo apt-get install m4
-sudo apt-get -y install  libboost-all-dev
+#sudo apt-get install bzip2 
+#sudo apt-get install unzip 
+#sudo apt-get install gcc-c++ 
+#sudo apt-get install gcc-c++ 
+#sudo apt-get install m4
+#sudo apt-get -y install  libboost-all-dev
 
 cd linux
 
@@ -20,3 +20,4 @@ bash mpir.get &
 
 wait
 echo "all done!"
+cd ../../

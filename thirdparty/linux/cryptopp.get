@@ -4,6 +4,6 @@ rm cryptopp562.zip
 
 cd cryptopp
 
-cp ../cryptopp_force/* .
+cp ../cryptopp_patch/* .
 
 make

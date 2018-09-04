@@ -130,7 +130,7 @@ void BopSender(string ipAddress)
 	std::string name("psi");
 
 	BtIOService ios(0);
-	BtEndpoint ep0(ios, ipAddress, 1215, true, name);
+	BtEndpoint ep0(ios, ipAddress, 22, true, name);
 
 
 	std::vector<Channel*> sendChls(numThreads);
@@ -219,7 +219,7 @@ void BopRecv(string ipAddress)
 	std::string name("psi");
 
 	BtIOService ios(0);
-	BtEndpoint ep1(ios, ipAddress, 1215, false, name);
+	BtEndpoint ep1(ios, ipAddress, 22, false, name);
 
 
 	std::vector<Channel*> recvChls(numThreads);

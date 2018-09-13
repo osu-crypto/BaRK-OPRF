@@ -114,7 +114,7 @@ void pingTest(Channel& chl, bool sender)
 
 }
 
-void BopSender(string ipAddress)
+void BopSender(string ipAddressPort)
 {
 	std::cout << "BopSender()" << std::endl;
 	u64 numThreads = 1;
@@ -130,7 +130,8 @@ void BopSender(string ipAddress)
 	std::string name("psi");
 
 	BtIOService ios(0);
-	BtEndpoint ep0(ios, ipAddress, 22, true, name);
+
+	BtEndpoint ep0(ios, ipAddressPort,  true, name);
 
 
 	std::vector<Channel*> sendChls(numThreads);
@@ -204,7 +205,7 @@ void BopSender(string ipAddress)
 	ios.stop();
 }
 
-void BopRecv(string ipAddress)
+void BopRecv(string ipAddressPort)
 {
 	std::cout << "BopRecv()" << std::endl;
 
@@ -219,7 +220,7 @@ void BopRecv(string ipAddress)
 	std::string name("psi");
 
 	BtIOService ios(0);
-	BtEndpoint ep1(ios, ipAddress, 22, false, name);
+	BtEndpoint ep1(ios, ipAddressPort,false, name);
 
 
 	std::vector<Channel*> recvChls(numThreads);
@@ -363,8 +364,8 @@ void BopTest()
 	std::string name("psi");
 
 	BtIOService ios(0);
-	BtEndpoint ep0(ios, "localhost", 1213, true, name);
-	BtEndpoint ep1(ios, "localhost", 1213, false, name);
+	BtEndpoint ep0(ios, "localhost:1213", true, name);
+	BtEndpoint ep1(ios, "localhost:1213", false, name);
 
 
 	std::vector<Channel*> recvChls(numThreads), sendChls(numThreads);
@@ -438,8 +439,11 @@ void usage(const char* argv0)
 	std::cout << "Error! Please use:" << std::endl;
 	std::cout << "\t 1. For unit test: " << argv0 << " -t" << std::endl;
 	std::cout << "\t 2. For simulation (2 terminal): " << std::endl;;
-	std::cout << "\t\t Sender terminal: " << argv0 << " -r 0" << std::endl;
-	std::cout << "\t\t Receiver terminal: " << argv0 << " -r 1" << std::endl;
+	std::cout << "\t\t Sender terminal (localhost): " << argv0 << " -r 0" << std::endl;
+	std::cout << "\t\t Receiver terminal (localhost): " << argv0 << " -r 1" << std::endl;
+
+	std::cout << "\t\t Sender terminal (with ip input): " << argv0 << " -r 0 -ip <ip:port>" << std::endl;
+	std::cout << "\t\t Receiver terminal (with ip input): " << argv0 << " -r 1 -ip <ip:port>" << std::endl;
 }
 
 int main(int argc, char** argv)
@@ -457,16 +461,17 @@ int main(int argc, char** argv)
 		BopTest();
 	}
 	else if (argc == 3 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 0) {
-		BopSender("localhost");
+		BopSender("localhost:1213");
 	}
 	else if (argc == 3 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 1) {
-		BopRecv("localhost");
+		BopRecv("localhost:1213");
 	}
-	else if (argc == 5 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 0 && argv[3][0] == '-' && argv[3][1] == 'p') {
+	else if (argc == 5 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 0 && argv[3][0] == '-' && argv[3][1] == 'i'&& argv[3][2] == 'p') {
 		string ipAddr = argv[4];
 		BopSender(ipAddr);
+
 	}
-	else if (argc == 5 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 1 && argv[3][0] == '-' && argv[3][1] == 'p') {
+	else if (argc == 5 && argv[1][0] == '-' && argv[1][1] == 'r' && atoi(argv[2]) == 1 && argv[3][0] == '-' && argv[3][1] == 'i'&& argv[3][2] == 'p') {
 		string ipAddr = argv[4];
 		BopRecv(ipAddr);
 	}

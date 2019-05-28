@@ -1,7 +1,7 @@
 # Batched Oblivious PRF
 This is the implementation of our [CCS 2016](http://dl.acm.org/citation.cfm?id=2978381)  paper: **Efficient Batched Oblivious PRF with Applications to Private Set Intersection**[[ePrint](https://eprint.iacr.org/2016/799)]. 
 
-Evaluating on a single server (`2 36-cores Intel Xeon CPU E5-2699 v3 @ 2.30GHz and 256GB of RAM`) with a single thread per party, ours protocol requires only `3.8` seconds to securely compute the intersection of `2^20`-size sets, regardless of the bit length of the items.
+Evaluating on a single server (`2 36-cores Intel Xeon CPU E5-2699 v3 @ 2.30GHz and 256GB of RAM`) with a single thread per party, our protocol requires only `3.8` seconds to securely compute the intersection of `2^20`-size sets, regardless of the bit length of the items.
 
 ## Installations
 

@@ -1,6 +1,9 @@
 cat "downloading Miracl"
 echo "building Mircal"
+export ROOT=$(pwd)
+echo $ROOT
 cd miracl/miracl/source/
 bash linux64
-cd miracl/miracl_ostm/source/
-bash linux64
+cd $ROOT
+cd miracl/miracl_osmt/source/
+bash linux64_cpp
